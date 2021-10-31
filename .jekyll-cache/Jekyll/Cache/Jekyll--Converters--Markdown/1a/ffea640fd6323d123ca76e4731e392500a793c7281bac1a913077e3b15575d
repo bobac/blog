@@ -1,0 +1,67 @@
+I"D<p>Tenhle blbník běží na <a href="https://jekyllrb.com">Jekyllu</a>. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?</p>
+
+<p>Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.</p>
+
+<p><strong>Jekyll</strong> umí samozřejmě vkládat obrázky:</p>
+
+<p><img src="/assets/images/tux.png" alt="Tux, maskot Linuxu" /></p>
+
+<p>…protože to umí <a href="https://www.markdownguide.org/basic-syntax/">Markdown</a>. Idea Markdownu je, aby text, který v něm napíšete, šlo lidsky číst, i když do něj koukáte, jako do prostýho texťáku. Kdo se někdy snažil přečíst delší text v html bez prohlížeče, který by jej vyrenderoval ví, o čem mluvím.</p>
+
+<p>Markdown (MD) samozřejmě umí <em>Kurzívu</em> nebo <strong>Tučný text</strong>. Taky umí číslované i nečíslované seznamy:</p>
+
+<ol>
+  <li>první položka
+    <ul>
+      <li>subpoložka a</li>
+      <li>subpoložka b</li>
+      <li>subpoložka c</li>
+    </ul>
+  </li>
+  <li>druhá položka</li>
+  <li>třetí položka</li>
+</ol>
+
+<p><strong>Jekyll</strong> nedělá nic jiného, než drží kostru webu pohromadě, tedy z hromádky textových (pardon, MD) souborů ve struktuře asi jako:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_posts
+    2021-10-29-prvni-post.md
+    2021-10-31-jekyll.md
+</code></pre></div></div>
+
+<p>vyrobí tenhle web v html.</p>
+
+<p>Původní text (zdroják, chcete-li) tohoto postu vypadá takhle:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: post
+author: bobac
+---
+Tenhle blbník běží na [Jekyllu](https://jekyllrb.com). Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?
+
+Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.
+
+**Jekyll** umí samozřejmě vkládat obrázky:
+
+![Tux, maskot Linuxu](/assets/images/tux.png)
+
+...protože to umí [Markdown](https://www.markdownguide.org/basic-syntax/). Idea Markdownu je, aby text, který v něm napíšete, šlo lidsky číst, i když do něj koukáte, jako do prostýho texťáku. Kdo se někdy snažil přečíst delší text v html bez prohlížeče, který by jej vyrenderoval ví, o čem mluvím.
+
+Markdown (MD) samozřejmě umí _Kurzívu_ nebo **Tučný text**. Taky umí číslované i nečíslované seznamy:
+
+1. první položka
+    - subpoložka a
+    - subpoložka b
+    - subpoložka c
+2. druhá položka
+3. třetí položka
+
+**Jekyll** nedělá nic jiného, než drží kostru webu pohromadě, tedy z hromádky textových (pardon, MD) souborů ve struktuře asi jako:
+
+    _posts
+        2021-10-29-prvni-post.md
+        2021-10-31-jekyll.md
+
+vyrobí tenhle web v html.
+</code></pre></div></div>
+:ET

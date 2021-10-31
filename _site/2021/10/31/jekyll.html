@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" />
+    <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Jekyll</title>
+<meta name="generator" content="Jekyll v4.2.1" />
+<meta property="og:title" content="Jekyll" />
+<meta name="author" content="bobac" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Tenhle blbník běží na Jekyllu. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?" />
+<meta property="og:description" content="Tenhle blbník běží na Jekyllu. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-10-31T00:00:00+02:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Jekyll" />
+<script type="application/ld+json">
+{"description":"Tenhle blbník běží na Jekyllu. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?","url":"/2021/10/31/jekyll.html","headline":"Jekyll","dateModified":"2021-10-31T00:00:00+02:00","datePublished":"2021-10-31T00:00:00+02:00","author":{"@type":"Person","name":"bobac"},"mainEntityOfPage":{"@type":"WebPage","@id":"/2021/10/31/jekyll.html"},"@type":"BlogPosting","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <title>Jekyll</title>
+</head>
+<body>
+    <nav>
+  
+    <a href="/" >
+        Bobáčův blbník
+    </a>
+  
+    <a href="/about.html" >
+        Něco o mě
+    </a>
+  
+</nav>
+    <h1>Jekyll</h1>
+<p>31 Oct 2021 - bobac</p>
+
+<p>Tenhle blbník běží na <a href="https://jekyllrb.com">Jekyllu</a>. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?</p>
+
+<p>Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.</p>
+
+<p><strong>Jekyll</strong> umí samozřejmě vkládat obrázky:</p>
+
+<p><img src="/assets/images/tux.png" alt="Tux, maskot Linuxu" /></p>
+
+<p>…protože to umí <a href="https://www.markdownguide.org/basic-syntax/">Markdown</a>. Idea Markdownu je, aby text, který v něm napíšete, šlo lidsky číst, i když do něj koukáte, jako do prostýho texťáku. Kdo se někdy snažil přečíst delší text v html bez prohlížeče, který by jej vyrenderoval ví, o čem mluvím.</p>
+
+<p>Markdown (MD) samozřejmě umí <em>Kurzívu</em> nebo <strong>Tučný text</strong>. Taky umí číslované i nečíslované seznamy:</p>
+
+<ol>
+  <li>první položka
+    <ul>
+      <li>subpoložka a</li>
+      <li>subpoložka b</li>
+      <li>subpoložka c</li>
+    </ul>
+  </li>
+  <li>druhá položka</li>
+  <li>třetí položka</li>
+</ol>
+
+<p><strong>Jekyll</strong> nedělá nic jiného, než drží kostru webu pohromadě, tedy z hromádky textových (pardon, MD) souborů ve struktuře asi jako:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>_posts
+    2021-10-29-prvni-post.md
+    2021-10-31-jekyll.md
+</code></pre></div></div>
+
+<p>vyrobí tenhle web v html.</p>
+
+<p>Původní text (zdroják, chcete-li) tohoto postu vypadá takhle:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: post
+author: bobac
+---
+Tenhle blbník běží na [Jekyllu](https://jekyllrb.com). Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?
+
+Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.
+
+**Jekyll** umí samozřejmě vkládat obrázky:
+
+![Tux, maskot Linuxu](/assets/images/tux.png)
+
+...protože to umí [Markdown](https://www.markdownguide.org/basic-syntax/). Idea Markdownu je, aby text, který v něm napíšete, šlo lidsky číst, i když do něj koukáte, jako do prostýho texťáku. Kdo se někdy snažil přečíst delší text v html bez prohlížeče, který by jej vyrenderoval ví, o čem mluvím.
+
+Markdown (MD) samozřejmě umí _Kurzívu_ nebo **Tučný text**. Taky umí číslované i nečíslované seznamy:
+
+1. první položka
+    - subpoložka a
+    - subpoložka b
+    - subpoložka c
+2. druhá položka
+3. třetí položka
+
+**Jekyll** nedělá nic jiného, než drží kostru webu pohromadě, tedy z hromádky textových (pardon, MD) souborů ve struktuře asi jako:
+
+    _posts
+        2021-10-29-prvni-post.md
+        2021-10-31-jekyll.md
+
+vyrobí tenhle web v html.
+</code></pre></div></div>
+
+</body>
+</html>
