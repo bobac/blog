@@ -1,0 +1,95 @@
+I"6<p>Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru <strong><a href="https://caddyserver.com/">Caddy</a></strong>, ale zatím jsem si vždy vystačil s kombem <a href="https://www.nginx.com/">NGINX</a> a geniálním, krásným, a vůbec po všech stránkách velmi povedeným <a href="https://nginxproxymanager.com/">Nginx Proxy Managerem</a>. Důvod, proč jsem vždycky používal <strong>NGINX</strong> (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil <strong>Let’s Encrypt</strong> certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale <strong>Nginx Proxy Manager</strong> to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej <em>HTTP</em> traffic automaticky forwardovat na <em>HTTPS</em> a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro <strong>NGINX</strong> samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:</p>
+
+<p><img src="/assets/images/proxy-manager.png" alt="Screenshot z Nginx Proxy Manageru" /></p>
+
+<p>Rozběhnout je to hračka - potřebujete soubor <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>, který může vypadat třeba takhle:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: '3'
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    environment:
+      DB_MYSQL_HOST: "db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "npm"
+      DB_MYSQL_NAME: "npm"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+  db:
+    image: 'jc21/mariadb-aria:latest'
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 'npm'
+      MYSQL_DATABASE: 'npm'
+      MYSQL_USER: 'npm'
+      MYSQL_PASSWORD: 'npm'
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+</code></pre></div></div>
+<p>(Dá se to bez přemýšlení obšlehnout z webu projektu).
+Kontejnery pustíte pomocí <code class="language-plaintext highlighter-rouge">docker-compose up -d</code> a pak stačí jen klikat na <code class="language-plaintext highlighter-rouge">http://lokalni_ip:81</code>. Prvotní uživatelské jméno je <code class="language-plaintext highlighter-rouge">admin@example.com</code> a heslo je <code class="language-plaintext highlighter-rouge">changeme</code>. Myslel sem si, že už to jednodušší být nemůže…</p>
+
+<h2 id="seznamte-se-tohle-je-caddy">Seznamte se, tohle je Caddy</h2>
+<p>Idea webového serveru <strong>Caddy</strong> je následující: Všechno musí fungovat v defaultním nastavení tak nějak samo. <strong>Caddy</strong> je <em>HTTPS</em> first, tedy pokud <em>HTTPS</em> explicitně nezakážete, pojede pod <em>HTTPS</em> a sám si bude točit certifikáty. Konfigurák, který se jmenuje <code class="language-plaintext highlighter-rouge">Caddyfile</code>, pro reverzní proxy je až směšně jednoduchej:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>venkovni.server.cz {
+  reverse_proxy https://192.168.1.1:443 {
+    transport http_ntlm {
+      tls_insecure_skip_verify
+    }
+  }
+}
+</code></pre></div></div>
+<p>Tohle samo vyrobí https://venkovni.server.cz, zařídí si to certifikáty a bude servírovat server na vnitřní https://192.168.1.1:443, který vyžaduje NTLM autentifikaci. V mém případě je vnitřní traffic podepsaný self-signed certifikátem, takže je třeba odstavec <code class="language-plaintext highlighter-rouge">{ tls_insecure_skip_verify }</code>, kdybych měl vevnitř jen <em>http</em>, není třeba ani to.</p>
+
+<h3 id="instalace">Instalace</h3>
+<p>Jediná drobná zrada je v tom, že si nemůžu jen tak vzít hotový <code class="language-plaintext highlighter-rouge">Dockerfile</code> nebo <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>, protože podpora pro NTLM transport není ve standardní binárce zakompilovaná. Ale i tak je to easy - dalo mi to asi hodinku než jsem na to přišel, a to jenom proto, že před tou hodinkou byly moje znalosti o <strong>Caddym</strong> následující:</p>
+
+<ol>
+  <li>Je to web server/reverzní proxy</li>
+  <li>Je to napsaný v Go</li>
+</ol>
+
+<p>To druhý není pro náš případ vůbec podstatný, ale protože se v <em>Go</em> komunitě už nějakou dobu pohybuju, díky tomu jsem se o <strong>Caddy</strong> vůbec dozvěděl :-)</p>
+
+<p>Takže potřebujema dva soubory. <code class="language-plaintext highlighter-rouge">Dockerfile</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM caddy:2.4.5-builder AS builder
+
+RUN xcaddy build \
+    --with github.com/caddyserver/ntlm-transport
+
+FROM caddy:2.4.5
+
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+</code></pre></div></div>
+
+<p>A <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: "3.7"
+
+services:
+  caddy:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/site:/srv
+      - $PWD/data:/data
+      - $PWD/config:/config
+</code></pre></div></div>
+
+<p>Takže teď už stačí <strong>Caddy</strong> zbuildit pomocí <code class="language-plaintext highlighter-rouge">docker-compose build</code>. Než ho pustíte, dejte si k těm dvěma souborům do adresáře ještě připravený <code class="language-plaintext highlighter-rouge">Caddyfile</code> (viz výše).</p>
+
+<p>Spustíte pomocí <code class="language-plaintext highlighter-rouge">docker-compose up -d</code>.
+A je to.</p>
+
+<h2 id="závěr">Závěr</h2>
+<p>Nevím, jestli se zbavím svého <strong>NGINX</strong>. Ale jenom kvůli tomu, že na něj existuje to krásný klikátko. <strong>Caddy</strong> je totiž tak easy, že snad klikátko ani nepotřebuje. Ale pokud budu zase někdy potřebovat reverzní proxy s NTLM (v mém případě to bylo kvůli Windows Admin Center), určitě po Caddym sáhnu. A dost možná, že na něj přejdu úplně a klikátko oželím. Je to zatím nejjednodušší web server, jaký jsem kdy viděl.</p>
+:ET

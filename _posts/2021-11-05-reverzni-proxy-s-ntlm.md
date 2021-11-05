@@ -39,7 +39,7 @@ services:
       - ./data/mysql:/var/lib/mysql
 ```
 (Dá se to bez přemýšlení obšlehnout z webu projektu).
-Kontejnery pustíte pomocí `docker-compose up -d` a pak stačí jen klikat na `http://lokalni_ip:81`. Prvotní uživatelské jméno je `admin@example.com` a heslo je `changeme`. Myslej sem si, že už to jednodušší být nemůže...
+Kontejnery pustíte pomocí `docker-compose up -d` a pak stačí jen klikat na `http://lokalni_ip:81`. Prvotní uživatelské jméno je `admin@example.com` a heslo je `changeme`. Myslel sem si, že už to jednodušší být nemůže...
 
 ## Seznamte se, tohle je Caddy
 Idea webového serveru **Caddy** je následující: Všechno musí fungovat v defaultním nastavení tak nějak samo. **Caddy** je *HTTPS* first, tedy pokud *HTTPS* explicitně nezakážete, pojede pod *HTTPS* a sám si bude točit certifikáty. Konfigurák, který se jmenuje `Caddyfile`, pro reverzní proxy je až směšně jednoduchej:

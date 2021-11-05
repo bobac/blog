@@ -1,4 +1,97 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-10-31T19:02:26+01:00</updated><id>/feed.xml</id><entry><title type="html">Jekyll</title><link href="/2021/10/31/jekyll.html" rel="alternate" type="text/html" title="Jekyll" /><published>2021-10-31T00:00:00+02:00</published><updated>2021-10-31T00:00:00+02:00</updated><id>/2021/10/31/jekyll</id><content type="html" xml:base="/2021/10/31/jekyll.html">&lt;p&gt;Tenhle blbník běží na &lt;a href=&quot;https://jekyllrb.com&quot;&gt;Jekyllu&lt;/a&gt;. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-11-05T18:44:10+01:00</updated><id>/feed.xml</id><entry><title type="html">Reverzní proxy s NTLM</title><link href="/2021/11/05/reverzni-proxy-s-ntlm.html" rel="alternate" type="text/html" title="Reverzní proxy s NTLM" /><published>2021-11-05T00:00:00+01:00</published><updated>2021-11-05T00:00:00+01:00</updated><id>/2021/11/05/reverzni-proxy-s-ntlm</id><content type="html" xml:base="/2021/11/05/reverzni-proxy-s-ntlm.html">&lt;p&gt;Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru &lt;strong&gt;&lt;a href=&quot;https://caddyserver.com/&quot;&gt;Caddy&lt;/a&gt;&lt;/strong&gt;, ale zatím jsem si vždy vystačil s kombem &lt;a href=&quot;https://www.nginx.com/&quot;&gt;NGINX&lt;/a&gt; a geniálním, krásným, a vůbec po všech stránkách velmi povedeným &lt;a href=&quot;https://nginxproxymanager.com/&quot;&gt;Nginx Proxy Managerem&lt;/a&gt;. Důvod, proč jsem vždycky používal &lt;strong&gt;NGINX&lt;/strong&gt; (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil &lt;strong&gt;Let’s Encrypt&lt;/strong&gt; certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale &lt;strong&gt;Nginx Proxy Manager&lt;/strong&gt; to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej &lt;em&gt;HTTP&lt;/em&gt; traffic automaticky forwardovat na &lt;em&gt;HTTPS&lt;/em&gt; a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro &lt;strong&gt;NGINX&lt;/strong&gt; samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/proxy-manager.png&quot; alt=&quot;Screenshot z Nginx Proxy Manageru&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Rozběhnout je to hračka - potřebujete soubor &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt;, který může vypadat třeba takhle:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;version: &apos;3&apos;
+services:
+  app:
+    image: &apos;jc21/nginx-proxy-manager:latest&apos;
+    restart: unless-stopped
+    ports:
+      - &apos;80:80&apos;
+      - &apos;81:81&apos;
+      - &apos;443:443&apos;
+    environment:
+      DB_MYSQL_HOST: &quot;db&quot;
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: &quot;npm&quot;
+      DB_MYSQL_PASSWORD: &quot;npm&quot;
+      DB_MYSQL_NAME: &quot;npm&quot;
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+  db:
+    image: &apos;jc21/mariadb-aria:latest&apos;
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: &apos;npm&apos;
+      MYSQL_DATABASE: &apos;npm&apos;
+      MYSQL_USER: &apos;npm&apos;
+      MYSQL_PASSWORD: &apos;npm&apos;
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;(Dá se to bez přemýšlení obšlehnout z webu projektu).
+Kontejnery pustíte pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose up -d&lt;/code&gt; a pak stačí jen klikat na &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://lokalni_ip:81&lt;/code&gt;. Prvotní uživatelské jméno je &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;admin@example.com&lt;/code&gt; a heslo je &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;changeme&lt;/code&gt;. Myslel sem si, že už to jednodušší být nemůže…&lt;/p&gt;
+
+&lt;h2 id=&quot;seznamte-se-tohle-je-caddy&quot;&gt;Seznamte se, tohle je Caddy&lt;/h2&gt;
+&lt;p&gt;Idea webového serveru &lt;strong&gt;Caddy&lt;/strong&gt; je následující: Všechno musí fungovat v defaultním nastavení tak nějak samo. &lt;strong&gt;Caddy&lt;/strong&gt; je &lt;em&gt;HTTPS&lt;/em&gt; first, tedy pokud &lt;em&gt;HTTPS&lt;/em&gt; explicitně nezakážete, pojede pod &lt;em&gt;HTTPS&lt;/em&gt; a sám si bude točit certifikáty. Konfigurák, který se jmenuje &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Caddyfile&lt;/code&gt;, pro reverzní proxy je až směšně jednoduchej:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;venkovni.server.cz {
+  reverse_proxy https://192.168.1.1:443 {
+    transport http_ntlm {
+      tls_insecure_skip_verify
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Tohle samo vyrobí https://venkovni.server.cz, zařídí si to certifikáty a bude servírovat server na vnitřní https://192.168.1.1:443, který vyžaduje NTLM autentifikaci. V mém případě je vnitřní traffic podepsaný self-signed certifikátem, takže je třeba odstavec &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;{ tls_insecure_skip_verify }&lt;/code&gt;, kdybych měl vevnitř jen &lt;em&gt;http&lt;/em&gt;, není třeba ani to.&lt;/p&gt;
+
+&lt;h3 id=&quot;instalace&quot;&gt;Instalace&lt;/h3&gt;
+&lt;p&gt;Jediná drobná zrada je v tom, že si nemůžu jen tak vzít hotový &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Dockerfile&lt;/code&gt; nebo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt;, protože podpora pro NTLM transport není ve standardní binárce zakompilovaná. Ale i tak je to easy - dalo mi to asi hodinku než jsem na to přišel, a to jenom proto, že před tou hodinkou byly moje znalosti o &lt;strong&gt;Caddym&lt;/strong&gt; následující:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Je to web server/reverzní proxy&lt;/li&gt;
+  &lt;li&gt;Je to napsaný v Go&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;To druhý není pro náš případ vůbec podstatný, ale protože se v &lt;em&gt;Go&lt;/em&gt; komunitě už nějakou dobu pohybuju, díky tomu jsem se o &lt;strong&gt;Caddy&lt;/strong&gt; vůbec dozvěděl :-)&lt;/p&gt;
+
+&lt;p&gt;Takže potřebujema dva soubory. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Dockerfile&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;FROM caddy:2.4.5-builder AS builder
+
+RUN xcaddy build \
+    --with github.com/caddyserver/ntlm-transport
+
+FROM caddy:2.4.5
+
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;A &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose.yml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;version: &quot;3.7&quot;
+
+services:
+  caddy:
+    build: .
+    restart: unless-stopped
+    ports:
+      - &quot;8080:80&quot;
+      - &quot;8443:443&quot;
+    volumes:
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/site:/srv
+      - $PWD/data:/data
+      - $PWD/config:/config
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Takže teď už stačí &lt;strong&gt;Caddy&lt;/strong&gt; zbuildit pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose build&lt;/code&gt;. Než ho pustíte, dejte si k těm dvěma souborům do adresáře ještě připravený &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Caddyfile&lt;/code&gt; (viz výše).&lt;/p&gt;
+
+&lt;p&gt;Spustíte pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker-compose up -d&lt;/code&gt;.
+A je to.&lt;/p&gt;
+
+&lt;h2 id=&quot;závěr&quot;&gt;Závěr&lt;/h2&gt;
+&lt;p&gt;Nevím, jestli se zbavím svého &lt;strong&gt;NGINX&lt;/strong&gt;. Ale jenom kvůli tomu, že na něj existuje to krásný klikátko. &lt;strong&gt;Caddy&lt;/strong&gt; je totiž tak easy, že snad klikátko ani nepotřebuje. Ale pokud budu zase někdy potřebovat reverzní proxy s NTLM (v mém případě to bylo kvůli Windows Admin Center), určitě po Caddym sáhnu. A dost možná, že na něj přejdu úplně a klikátko oželím. Je to zatím nejjednodušší web server, jaký jsem kdy viděl.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru Caddy, ale zatím jsem si vždy vystačil s kombem NGINX a geniálním, krásným, a vůbec po všech stránkách velmi povedeným Nginx Proxy Managerem. Důvod, proč jsem vždycky používal NGINX (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil Let’s Encrypt certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale Nginx Proxy Manager to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej HTTP traffic automaticky forwardovat na HTTPS a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro NGINX samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:</summary></entry><entry><title type="html">Jekyll</title><link href="/2021/10/31/jekyll.html" rel="alternate" type="text/html" title="Jekyll" /><published>2021-10-31T00:00:00+02:00</published><updated>2021-10-31T00:00:00+02:00</updated><id>/2021/10/31/jekyll</id><content type="html" xml:base="/2021/10/31/jekyll.html">&lt;p&gt;Tenhle blbník běží na &lt;a href=&quot;https://jekyllrb.com&quot;&gt;Jekyllu&lt;/a&gt;. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?&lt;/p&gt;
 
 &lt;p&gt;Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.&lt;/p&gt;
 
