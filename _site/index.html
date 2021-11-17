@@ -36,6 +36,18 @@
 <ul>
   
     <li>
+      <h2><a href="/2021/11/17/Tagy-na-mp3-z-cli.html">Tagy na MP3 z CLI</a></h2>
+      <p>Před chvílí jsem zjitil, že potřebuji z command lajny na linuxovém serveru upravovat tagy pro MP3 soubory. Po chvíli googlení jsem přistál u <code class="language-plaintext highlighter-rouge">mid3v2</code>. Hlavní důvod je, že by měl podporovat <strong>utf-8</strong>.</p>
+
+    </li>
+  
+    <li>
+      <h2><a href="/2021/11/17/Navidrome-self-hosted-music-streaming.html">Navidrome - self hosted music streaming</a></h2>
+      <p>V minulém <a href="/2021/11/17/Tagy-na-mp3-z-cli.html">blogu</a> jsem psal o <strong>mid3v2</strong> k editování MP3 Tagů z CLI. Potřeboval jsem si rozběhnout vlastní streamování MP3, které bude mimo iTunes. Jde o to, že mám pár audioknih, které jsem koupil u <a href="https://kechlibar.net/obchod/">Mariana Kechlibara</a>, a které jsem potřeboval oddělit od iTunes. Důvod je poměrně jednoduchý - chci, abych měl rozposlouchanou knihu někde jinde než muziku, z toho prostého důvodu, že iTunes nemá žádné záložky, takže jakmile pustím nějakou hudbu, prd vím, kde jsem přestal poslouchat knížku :-)</p>
+
+    </li>
+  
+    <li>
       <h2><a href="/2021/11/05/reverzni-proxy-s-ntlm.html">Reverzní proxy s NTLM</a></h2>
       <p>Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru <strong><a href="https://caddyserver.com/">Caddy</a></strong>, ale zatím jsem si vždy vystačil s kombem <a href="https://www.nginx.com/">NGINX</a> a geniálním, krásným, a vůbec po všech stránkách velmi povedeným <a href="https://nginxproxymanager.com/">Nginx Proxy Managerem</a>. Důvod, proč jsem vždycky používal <strong>NGINX</strong> (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil <strong>Let’s Encrypt</strong> certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale <strong>Nginx Proxy Manager</strong> to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej <em>HTTP</em> traffic automaticky forwardovat na <em>HTTPS</em> a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro <strong>NGINX</strong> samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:</p>
 
