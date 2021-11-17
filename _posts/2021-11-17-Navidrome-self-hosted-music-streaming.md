@@ -31,7 +31,7 @@ services:
       - "./data:/data"
       - "/path/to/your/music/here:/music:ro"
 ```
-`/path/to/your/music/here` je v mém případě na zfs svazku, který se jmenuje `tank/audiobooks`, což s sebou přineslo nepříjemný efekt, že kontejner nešlo spustit s obskurní chybovou hláškou, že nemůže vytvořit volume, které je read-only, či něco podobného. Strejda Gůgl mi řekl, že je to proto, že mám docker nainstalovaný (Ubuntu 20.04) pomocí **snap** balíčků, až že se to pak u zfs stává. Řešením bylo `sudo snap remove docker` a instalace pomocí `apt`, návodů je plný internet. Nepříjemností je, že budete muset re-creatnout (buildnout/pullnout) všechny existující kontejnery, což znamenalo puze čtvrthodinové zdržení. **Miluju Docker!!!** Instalovat všechno postaru, to by mě jeblo.
+`/path/to/your/music/here` je v mém případě na zfs svazku, který se jmenuje `tank/audiobooks`, což s sebou přineslo nepříjemný efekt, že kontejner nešlo spustit s obskurní chybovou hláškou, že nemůže vytvořit volume, které je read-only, či něco podobného. Strejda Gůgl mi řekl, že je to proto, že mám docker nainstalovaný (Ubuntu 20.04) pomocí **snap** balíčků, až že se to pak u zfs stává. Řešením bylo `sudo snap remove docker` a instalace pomocí `apt`, návodů je plný internet. Nepříjemností je, že budete muset re-creatnout (buildnout/pullnout) všechny existující kontejnery, což znamenalo puoze čtvrthodinové zdržení. **Miluju Docker!!!** Instalovat všechno postaru, to by mě jeblo.
 
 ## Spuštění
 Easy: `docker-compose up -d`. Pak se připojit na `http://ip_serveru:4533`, vytvořit si uživatele a je to. Já jsem si ještě vyrobil site na reverzní proxy s HTTPS pomocí [proxy-manageru](/2021/11/05/reverzni-proxy-s-ntlm.html), abych mohl na svůj **Navidrome** zvenku.
