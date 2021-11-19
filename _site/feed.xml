@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-11-17T19:42:44+01:00</updated><id>/feed.xml</id><entry><title type="html">Navidrome - self hosted music streaming</title><link href="/2021/11/17/Navidrome-self-hosted-music-streaming.html" rel="alternate" type="text/html" title="Navidrome - self hosted music streaming" /><published>2021-11-17T00:00:00+01:00</published><updated>2021-11-17T00:00:00+01:00</updated><id>/2021/11/17/Navidrome-self-hosted-music-streaming</id><content type="html" xml:base="/2021/11/17/Navidrome-self-hosted-music-streaming.html">&lt;p&gt;V minulém &lt;a href=&quot;/2021/11/17/Tagy-na-mp3-z-cli.html&quot;&gt;blogu&lt;/a&gt; jsem psal o &lt;strong&gt;mid3v2&lt;/strong&gt; k editování MP3 Tagů z CLI. Potřeboval jsem si rozběhnout vlastní streamování MP3, které bude mimo iTunes. Jde o to, že mám pár audioknih, které jsem koupil u &lt;a href=&quot;https://kechlibar.net/obchod/&quot;&gt;Mariana Kechlibara&lt;/a&gt;, a které jsem potřeboval oddělit od iTunes. Důvod je poměrně jednoduchý - chci, abych měl rozposlouchanou knihu někde jinde než muziku, z toho prostého důvodu, že iTunes nemá žádné záložky, takže jakmile pustím nějakou hudbu, prd vím, kde jsem přestal poslouchat knížku :-)&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-11-19T15:21:41+01:00</updated><id>/feed.xml</id><entry><title type="html">Clonezilla - divná chyba MBR a GPT mismatch</title><link href="/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html" rel="alternate" type="text/html" title="Clonezilla - divná chyba MBR a GPT mismatch" /><published>2021-11-19T00:00:00+01:00</published><updated>2021-11-19T00:00:00+01:00</updated><id>/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error</id><content type="html" xml:base="/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html">&lt;p&gt;Experimentoval jsem s &lt;a href=&quot;https://clonezilla.org/&quot;&gt;Clonezillou&lt;/a&gt;. Nainstaloval jsem čisté &lt;strong&gt;Windows 10 Pro&lt;/strong&gt; na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako &lt;em&gt;“this disk contains mismatched gpt and mbr”&lt;/em&gt; a imagování crashlo ještě dřív, než začalo.&lt;/p&gt;
+
+&lt;p&gt;No, a protože jsem začal gůglit a na první dobrou jsem si pěkně MBR partition zlikvidoval tak, že wokna ani nezačala bootovat, podruhé jsem gůglil pozorněji a tady je postup, co v takovém případě udělat - tohle fungovalo. Pro mě dobrá zpráva je, že jsem na disku neměl žádná data, takže kromě ztráty času se nekonal žádný stress :-)&lt;/p&gt;
+
+&lt;h2 id=&quot;postup&quot;&gt;Postup&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;přepnout se do command line (já jsem použil chvat Alt - šipka vlevo, ale Clonezilla na to má i meníčko)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo gdisk /dev/sda&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;Dostanete něco jako:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Partition table scan:
+MBR: MBR only
+BSD: not present
+APM: not present
+GPT: present
+
+Found valid MBR and GPT. Which do you want to use?
+1 – MBR
+2 – GPT
+3 – Create blank GPT
+
+Your answer:
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Zvolíte 1 - MBR&lt;/li&gt;
+  &lt;li&gt;následuje:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Command (? for help): x
+
+Expert command (? for help): z
+About to wipe out GPT on /dev/sda. Proceed? (Y/N): y
+GPT data structures destroyed! You may now partition the disk using fdisk or
+other utilities.
+Blank out MBR? (Y/N): n
+MBR is unchanged. You may need to delete an EFI GPT (0xEE) partition
+with fdisk or another tool.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;done&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;credits&quot;&gt;Credits&lt;/h2&gt;
+&lt;p&gt;Našel jsem to původně &lt;a href=&quot;https://casits.artsandsciences.fsu.edu/tips/cloning-systems/mismatched-GPT-MBR-error&quot;&gt;tady&lt;/a&gt;.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Experimentoval jsem s Clonezillou. Nainstaloval jsem čisté Windows 10 Pro na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako “this disk contains mismatched gpt and mbr” a imagování crashlo ještě dřív, než začalo.</summary></entry><entry><title type="html">Navidrome - self hosted music streaming</title><link href="/2021/11/17/Navidrome-self-hosted-music-streaming.html" rel="alternate" type="text/html" title="Navidrome - self hosted music streaming" /><published>2021-11-17T00:00:00+01:00</published><updated>2021-11-17T00:00:00+01:00</updated><id>/2021/11/17/Navidrome-self-hosted-music-streaming</id><content type="html" xml:base="/2021/11/17/Navidrome-self-hosted-music-streaming.html">&lt;p&gt;V minulém &lt;a href=&quot;/2021/11/17/Tagy-na-mp3-z-cli.html&quot;&gt;blogu&lt;/a&gt; jsem psal o &lt;strong&gt;mid3v2&lt;/strong&gt; k editování MP3 Tagů z CLI. Potřeboval jsem si rozběhnout vlastní streamování MP3, které bude mimo iTunes. Jde o to, že mám pár audioknih, které jsem koupil u &lt;a href=&quot;https://kechlibar.net/obchod/&quot;&gt;Mariana Kechlibara&lt;/a&gt;, a které jsem potřeboval oddělit od iTunes. Důvod je poměrně jednoduchý - chci, abych měl rozposlouchanou knihu někde jinde než muziku, z toho prostého důvodu, že iTunes nemá žádné záložky, takže jakmile pustím nějakou hudbu, prd vím, kde jsem přestal poslouchat knížku :-)&lt;/p&gt;
 
 &lt;h2 id=&quot;požadavky&quot;&gt;Požadavky&lt;/h2&gt;
 &lt;p&gt;Celkem jednoduché:&lt;/p&gt;

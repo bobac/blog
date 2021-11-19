@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" />
+    <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Clonezilla - divná chyba MBR a GPT mismatch</title>
+<meta name="generator" content="Jekyll v4.2.1" />
+<meta property="og:title" content="Clonezilla - divná chyba MBR a GPT mismatch" />
+<meta name="author" content="bobac" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Experimentoval jsem s Clonezillou. Nainstaloval jsem čisté Windows 10 Pro na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako “this disk contains mismatched gpt and mbr” a imagování crashlo ještě dřív, než začalo." />
+<meta property="og:description" content="Experimentoval jsem s Clonezillou. Nainstaloval jsem čisté Windows 10 Pro na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako “this disk contains mismatched gpt and mbr” a imagování crashlo ještě dřív, než začalo." />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-11-19T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Clonezilla - divná chyba MBR a GPT mismatch" />
+<script type="application/ld+json">
+{"url":"/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html","headline":"Clonezilla - divná chyba MBR a GPT mismatch","dateModified":"2021-11-19T00:00:00+01:00","datePublished":"2021-11-19T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html"},"author":{"@type":"Person","name":"bobac"},"@type":"BlogPosting","description":"Experimentoval jsem s Clonezillou. Nainstaloval jsem čisté Windows 10 Pro na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako “this disk contains mismatched gpt and mbr” a imagování crashlo ještě dřív, než začalo.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <title>Clonezilla - divná chyba MBR a GPT mismatch</title>
+</head>
+<body>
+    <nav>
+  
+    <a href="/" >
+        Bobáčův blbník
+    </a>
+  
+    <a href="/about.html" >
+        Něco o mě
+    </a>
+  
+</nav>
+    <h1>Clonezilla - divná chyba MBR a GPT mismatch</h1>
+<p>19 Nov 2021 - bobac</p>
+
+<p>Experimentoval jsem s <a href="https://clonezilla.org/">Clonezillou</a>. Nainstaloval jsem čisté <strong>Windows 10 Pro</strong> na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako <em>“this disk contains mismatched gpt and mbr”</em> a imagování crashlo ještě dřív, než začalo.</p>
+
+<p>No, a protože jsem začal gůglit a na první dobrou jsem si pěkně MBR partition zlikvidoval tak, že wokna ani nezačala bootovat, podruhé jsem gůglil pozorněji a tady je postup, co v takovém případě udělat - tohle fungovalo. Pro mě dobrá zpráva je, že jsem na disku neměl žádná data, takže kromě ztráty času se nekonal žádný stress :-)</p>
+
+<h2 id="postup">Postup</h2>
+
+<ul>
+  <li>přepnout se do command line (já jsem použil chvat Alt - šipka vlevo, ale Clonezilla na to má i meníčko)</li>
+  <li><code class="language-plaintext highlighter-rouge">sudo gdisk /dev/sda</code></li>
+  <li>Dostanete něco jako:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Partition table scan:
+MBR: MBR only
+BSD: not present
+APM: not present
+GPT: present
+
+Found valid MBR and GPT. Which do you want to use?
+1 – MBR
+2 – GPT
+3 – Create blank GPT
+
+Your answer:
+</code></pre></div></div>
+
+<ul>
+  <li>Zvolíte 1 - MBR</li>
+  <li>následuje:</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Command (? for help): x
+
+Expert command (? for help): z
+About to wipe out GPT on /dev/sda. Proceed? (Y/N): y
+GPT data structures destroyed! You may now partition the disk using fdisk or
+other utilities.
+Blank out MBR? (Y/N): n
+MBR is unchanged. You may need to delete an EFI GPT (0xEE) partition
+with fdisk or another tool.
+</code></pre></div></div>
+
+<ul>
+  <li>done</li>
+</ul>
+
+<h2 id="credits">Credits</h2>
+<p>Našel jsem to původně <a href="https://casits.artsandsciences.fsu.edu/tips/cloning-systems/mismatched-GPT-MBR-error">tady</a>.</p>
+
+</body>
+</html>

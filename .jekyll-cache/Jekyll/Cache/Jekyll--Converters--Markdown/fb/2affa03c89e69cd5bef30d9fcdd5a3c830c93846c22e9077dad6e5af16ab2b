@@ -1,0 +1,2 @@
+I"b<p>Experimentoval jsem s <a href="https://clonezilla.org/">Clonezillou</a>. Nainstaloval jsem čisté <strong>Windows 10 Pro</strong> na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako <em>“this disk contains mismatched gpt and mbr”</em> a imagování crashlo ještě dřív, než začalo.</p>
+:ET
