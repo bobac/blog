@@ -1,0 +1,17 @@
+I"	<p>Občas je třeba, aby RTC hodiny v počítači byly nastaveny na <em>UTC</em>, ale aby Windows ukazovaly čas dle naší časové zóny, tedy <em>local time</em>. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.</p>
+
+<p>To způsobuje následující problémy:</p>
+
+<ol>
+  <li>liší se časy souborů vytvořených jednotlivými systémy o rozdíl mezi UTC a místním časem (u nás o 1 až 2 hodiny, podle toho, jestli máme zrovna letní nebo zimní čas)</li>
+  <li>systémy se neustále přetahují o to, na kolik budou hodiny nastaveny, protože synchronizace času z internetu nastavuje taky RTC hodiny v počítači</li>
+  <li>následkem čeho není čas nikdy dobře :-)</li>
+</ol>
+
+<h2 id="co-s-tím">Co s tím</h2>
+<p>Stačí Windows říct, že mají taky počíat s tím, že čas v RTC hodinách v počítači (ten, co si nastavujete v setupu) je UTC. Stačí na to jednoduchá úprava v registrech:</p>
+
+<p>V klíči <code class="language-plaintext highlighter-rouge">HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation</code> vytvořte <code class="language-plaintext highlighter-rouge">QWORD</code> se jménam <code class="language-plaintext highlighter-rouge">RealTimeIsUniversal</code> a nastavte jeho hodnotu na <code class="language-plaintext highlighter-rouge">1</code> a rebootněte systém. To je vše.</p>
+
+<p>Pokud náhodou používáte 32bitová Windows (existuje ještě někdo takový?), místo <code class="language-plaintext highlighter-rouge">QWORD</code> použijte <code class="language-plaintext highlighter-rouge">DWORD</code>.</p>
+:ET

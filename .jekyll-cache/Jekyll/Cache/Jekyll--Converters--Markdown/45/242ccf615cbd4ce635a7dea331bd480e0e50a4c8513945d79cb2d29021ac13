@@ -1,0 +1,2 @@
+I"�<p>Občas je třeba, aby RTC hodiny v počítači byly nastaveny na <em>UTC</em>, ale aby Windows ukazovaly čas dle naší časové zóny, tedy <em>local time</em>. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.</p>
+:ET
