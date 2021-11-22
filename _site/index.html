@@ -36,6 +36,12 @@
 <ul>
   
     <li>
+      <h2><a href="/2021/11/22/zmena-raid-na-ahci-windows-10.html">Změna SATA RAID mode na AHCI a nebootující Windows 10</a></h2>
+      <p>Potřeboval jsem u svého stárnoucího <strong>Dell OptiPLex 3050</strong> změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou <strong>Windows 10</strong>, a na druhém (SATA) mám <strong>Ubuntu 20.04</strong>. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné <code class="language-plaintext highlighter-rouge">/dev/nvme*</code> nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.</p>
+
+    </li>
+  
+    <li>
       <h2><a href="/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC.html">Jak nastavit Windows, aby braly hodiny v počítači dle UTC</a></h2>
       <p>Občas je třeba, aby RTC hodiny v počítači byly nastaveny na <em>UTC</em>, ale aby Windows ukazovaly čas dle naší časové zóny, tedy <em>local time</em>. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.</p>
 
