@@ -1,0 +1,29 @@
+I"[
+<p>Potřeboval jsem u svého stárnoucího <strong>Dell OptiPLex 3050</strong> změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou <strong>Windows 10</strong>, a na druhém (SATA) mám <strong>Ubuntu 20.04</strong>. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné <code class="language-plaintext highlighter-rouge">/dev/nvme*</code> nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.</p>
+
+<p>Bohužel po přepnutí do AHCI režimu Windows odmítaly botovat, vždy skončily v režimu opravy. Málem jsem začal Windows opravovat z instalačního média, ale představa ukládání 5GB image na pomalou flešku mě donutila ještě chvíli gůglit a zde je, co jsem vygůglil.</p>
+
+<p>Problém je v podstatě jen v tom, že Windows nemají zavedený AHCI ovladač disku, stačí je nabootovat do Safe mode, ovladač se sám načte a po dalším rebootu do normálního režimu už je vše OK.</p>
+
+<h2 id="postup">Postup</h2>
+
+<ol>
+  <li>V běžících Windows se SATA mode RAID pustit <code class="language-plaintext highlighter-rouge">cmd</code> jako Administrator.</li>
+  <li><code class="language-plaintext highlighter-rouge">bcdedit /set {current} safeboot minimal</code></li>
+  <li>Reboot do BIOSu a změna na SATA mode na AHCI</li>
+  <li>Nabootovat do Windows (díky bodu 2 nastartují vždy v safe mode).</li>
+  <li><code class="language-plaintext highlighter-rouge">bcdedit /deletevalue {current} safeboot</code></li>
+  <li>Reboot - už to najede normálně v AHCI modu a Windows se spustí</li>
+</ol>
+
+<h3 id="poznámky">Poznámky</h3>
+
+<ol>
+  <li>V níže uvedeném postu se píše, že je třeba znát heslo uživatele (ne PIN, pokud používáte AzureAD). Uvedené používám, přesto mým Windows 10 21H2 pin stačil, žádné heslo jsem nepořeboval. Ale pozor na to, je dobré jej znát, co kdyby.</li>
+  <li>Stejně tak se tam píše, že budete potřebovat <em>Recovery key</em>, pokud používáte <strong>Bitlocker</strong>. Používám, měl jsem jej po ruce, nebyl třeba.</li>
+</ol>
+
+<h2 id="credits">Credits</h2>
+
+<p>Čerpal jsem ve fóru na <a href="https://superuser.com/questions/1280141/switch-raid-to-ahci-without-reinstalling-windows-10#:~:text=56-,There,-is%20actually%20another">Superuser</a>. Nepoužil jsem preferred řešení, ale to níže uvedené (link ukazuje přímo do textu, pokud používáte poslední Chrome, já mám <em>96.0.4664.55</em>).</p>
+:ET

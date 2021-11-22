@@ -11,7 +11,7 @@ Problém je v podstatě jen v tom, že Windows nemají zavedený AHCI ovladač d
 
 ## Postup
 
-1. V běžících Windows se SATA mode RAID pusťit `cmd` jako Administrator.
+1. V běžících Windows se SATA mode RAID pustit `cmd` jako Administrator.
 2. `bcdedit /set {current} safeboot minimal`
 3. Reboot do BIOSu a změna na SATA mode na AHCI
 4. Nabootovat do Windows (díky bodu 2 nastartují vždy v safe mode).
