@@ -1,4 +1,165 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-11-22T13:43:01+01:00</updated><id>/feed.xml</id><entry><title type="html">Změna SATA RAID mode na AHCI a nebootující Windows 10</title><link href="/2021/11/22/zmena-raid-na-ahci-windows-10.html" rel="alternate" type="text/html" title="Změna SATA RAID mode na AHCI a nebootující Windows 10" /><published>2021-11-22T00:00:00+01:00</published><updated>2021-11-22T00:00:00+01:00</updated><id>/2021/11/22/zmena-raid-na-ahci-windows-10</id><content type="html" xml:base="/2021/11/22/zmena-raid-na-ahci-windows-10.html">&lt;p&gt;Potřeboval jsem u svého stárnoucího &lt;strong&gt;Dell OptiPLex 3050&lt;/strong&gt; změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou &lt;strong&gt;Windows 10&lt;/strong&gt;, a na druhém (SATA) mám &lt;strong&gt;Ubuntu 20.04&lt;/strong&gt;. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/dev/nvme*&lt;/code&gt; nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-11-23T14:51:56+01:00</updated><id>/feed.xml</id><entry><title type="html">Příparava LVM pro instalaci Linuxu</title><link href="/2021/11/23/lvm.html" rel="alternate" type="text/html" title="Příparava LVM pro instalaci Linuxu" /><published>2021-11-23T00:00:00+01:00</published><updated>2021-11-23T00:00:00+01:00</updated><id>/2021/11/23/lvm</id><content type="html" xml:base="/2021/11/23/lvm.html">&lt;p&gt;Experimentuji z Arch Linuxem. Hlavní důvod je, že se zdá, že Arch je cesta, jak pochopit, relativně do detailů, jak některé věci, které před námi “velké” distribuce jako Debian, Ubuntu, či třeba Fedora tají tím, že je tak nějak udělají za nás. V následujcím postu se pokusím popsat, co je třeba udělat k rozběhnutí &lt;strong&gt;Linuxu na LVM s GPT diskem a EFI&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;partitions&quot;&gt;Partitions&lt;/h2&gt;
+
+&lt;p&gt;Vyrobil jsem si GPT disk se 3 partition:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/dev/sda1 - EFI System - 512MB
+/dev/sda2 - Linux Swap - 2*RAM
+/dev/sda3 - Linux LVM - 220GB
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;swap&quot;&gt;Swap&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;vytvoření swapu: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkswap /dev/sda2&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;zapnutí swapu: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;swapon /dev/sda2&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;ověření, že swap swappuje - &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;free&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;formátování-efi-partition&quot;&gt;Formátování EFI partition&lt;/h2&gt;
+
+&lt;p&gt;EFI naformátujeme jako &lt;em&gt;FAT32&lt;/em&gt; pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mkfs.fat -F 32 /dev/sda1&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;lvm&quot;&gt;LVM&lt;/h2&gt;
+
+&lt;h3 id=&quot;zjištění-jaké-lvm-capable-partition-máme-k-dispozici&quot;&gt;Zjištění, jaké LVM capable partition máme k dispozici&lt;/h3&gt;
+&lt;p&gt;Bylo by hezké, kdyby tam byly i ty naše nově vytvořené:-)&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lvmdiskscan
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;vytvoření-lvm-physical-volume&quot;&gt;Vytvoření LVM Physical Volume&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pvcreate DEVICE&lt;/code&gt; kde &lt;em&gt;DEVICE&lt;/em&gt; může být disk nebo partition. &lt;strong&gt;POZOR!&lt;/strong&gt; je to destruktivní akce:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# pvcreate /dev/sda3
+  Physical volume &quot;/dev/sda3&quot; successfully created.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ověření: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pvdisplay&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  &quot;/dev/sda3&quot; is a new physical volume of &quot;220.00 GiB&quot;
+  --- NEW Physical volume ---
+  PV Name               /dev/sda3
+  VG Name
+  PV Size               220.00 GiB
+  Allocatable           NO
+  PE Size               0
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+  PV UUID               Dhjl3L-fHD3-Yic2-R3s9-e1Op-mPka-FCGgwF
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Sumář lze také získat pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pvscan&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  PV /dev/sda3                      lvm2 [220.00 GiB]
+  Total: 1 [220.00 GiB] / in use: 0 [0   ] / in no VG: 1 [220.00 GiB]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;vytvoření-volume-group&quot;&gt;Vytvoření volume group&lt;/h3&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vgcreate lvm_root /dev/partition&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;V našem případě:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;root@archiso ~ # vgcreate vg_arch /dev/sda3
+  Volume group &quot;vg_arch&quot; successfully created
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ověření, že VG existují pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vgdisplay&lt;/code&gt;. Výstup vypadá takhle:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  --- Volume group ---
+  VG Name               vg_arch
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               &amp;lt;220.00 GiB
+  PE Size               4.00 MiB
+  Total PE              56319
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       56319 / &amp;lt;220.00 GiB
+  VG UUID               Mu8Gq9-3v9O-TL3F-RKZC-Z31D-TzOY-GUG9LZ
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;rozšiřování-volume-group&quot;&gt;Rozšiřování volume group&lt;/h3&gt;
+&lt;p&gt;Již existující volume group je možné rozšířit o další zařízení, např:
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vgextend vg_arch /dev/sdb1&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;vytvoření-logical-volumes&quot;&gt;Vytvoření logical volumes&lt;/h3&gt;
+&lt;p&gt;Vytvoříme 30GB &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lvm_root&lt;/code&gt; (/) a 80% zbytku použijeme na &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lvm_home&lt;/code&gt; (/home):&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# lvcreate -L 30G vg_arch -n lvm_root
+  Logical volume &quot;lvm_root&quot; created.
+# lvcreate -l 80%FREE vg_arch -n lvm_home
+  Logical volume &quot;lvm_home&quot; created.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Ověříme pomocí &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;lvdisplay&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  --- Logical volume ---
+  LV Path                /dev/vg_arch/lvm_root
+  LV Name                lvm_root
+  VG Name                vg_arch
+  LV UUID                5qKjyS-4Rik-t61M-yXpV-yLke-yBoU-fkylRd
+  LV Write Access        read/write
+  LV Creation host, time archiso, 2021-11-23 13:01:37 +0000
+  LV Status              available
+  # open                 0
+  LV Size                30.00 GiB
+  Current LE             7680
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           254:1
+
+  --- Logical volume ---
+  LV Path                /dev/vg_arch/lvm_home
+  LV Name                lvm_home
+  VG Name                vg_arch
+  LV UUID                RKPFXX-59Eh-8PhI-PsAb-zuC0-HNXQ-xP4zhn
+  LV Write Access        read/write
+  LV Creation host, time archiso, 2021-11-23 13:04:09 +0000
+  LV Status              available
+  # open                 0
+  LV Size                &amp;lt;152.00 GiB
+  Current LE             38911
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           254:2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;naformátování-a-mountování-lv&quot;&gt;Naformátování a mountování LV&lt;/h3&gt;
+&lt;p&gt;Logical volumes jsou k dispozici v &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/dev/vg_arch&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# ls /dev/vg_arch
+lvm_home  lvm_root
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Pokud nejsou vidět (u mě ano), mělo by pomoci nahrání kernel modulu a jejich zpřístupnění:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;modprobe dm_mod
+vgscan
+vgchange -ay
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;Naformátování a mountování&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkfs.&amp;lt;fstype&amp;gt; /dev/&amp;lt;volume_group&amp;gt;/&amp;lt;logical_volume&amp;gt;
+mount /dev/&amp;lt;volue_group&amp;gt;/&amp;lt;logical_volume&amp;gt; /&amp;lt;mountpoint&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Takže v našem případě:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mkfs.ext4 /dev/vg_arch/lvm_root
+mount /dev/vg_arch/lvm_root /mnt
+
+mkdir /mnt/home
+mkfs.ext4 /dev/vg_arch/lvm_home
+mount /dev/vg_arch/lvm_home /mnt/home
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;příště&quot;&gt;Příště&lt;/h2&gt;
+&lt;p&gt;Co s EFI bootem a tak… Snad. Asi. možná.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Experimentuji z Arch Linuxem. Hlavní důvod je, že se zdá, že Arch je cesta, jak pochopit, relativně do detailů, jak některé věci, které před námi “velké” distribuce jako Debian, Ubuntu, či třeba Fedora tají tím, že je tak nějak udělají za nás. V následujcím postu se pokusím popsat, co je třeba udělat k rozběhnutí Linuxu na LVM s GPT diskem a EFI.</summary></entry><entry><title type="html">Změna SATA RAID mode na AHCI a nebootující Windows 10</title><link href="/2021/11/22/zmena-raid-na-ahci-windows-10.html" rel="alternate" type="text/html" title="Změna SATA RAID mode na AHCI a nebootující Windows 10" /><published>2021-11-22T00:00:00+01:00</published><updated>2021-11-22T00:00:00+01:00</updated><id>/2021/11/22/zmena-raid-na-ahci-windows-10</id><content type="html" xml:base="/2021/11/22/zmena-raid-na-ahci-windows-10.html">&lt;p&gt;Potřeboval jsem u svého stárnoucího &lt;strong&gt;Dell OptiPLex 3050&lt;/strong&gt; změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou &lt;strong&gt;Windows 10&lt;/strong&gt;, a na druhém (SATA) mám &lt;strong&gt;Ubuntu 20.04&lt;/strong&gt;. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/dev/nvme*&lt;/code&gt; nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.&lt;/p&gt;
 
 &lt;p&gt;Bohužel po přepnutí do AHCI režimu Windows odmítaly botovat, vždy skončily v režimu opravy. Málem jsem začal Windows opravovat z instalačního média, ale představa ukládání 5GB image na pomalou flešku mě donutila ještě chvíli gůglit a zde je, co jsem vygůglil.&lt;/p&gt;
 

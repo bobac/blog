@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link type="application/atom+xml" rel="alternate" href="/feed.xml" />
+    <!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Příparava LVM pro instalaci Linuxu</title>
+<meta name="generator" content="Jekyll v4.2.1" />
+<meta property="og:title" content="Příparava LVM pro instalaci Linuxu" />
+<meta name="author" content="bobac" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Experimentuji z Arch Linuxem. Hlavní důvod je, že se zdá, že Arch je cesta, jak pochopit, relativně do detailů, jak některé věci, které před námi “velké” distribuce jako Debian, Ubuntu, či třeba Fedora tají tím, že je tak nějak udělají za nás. V následujcím postu se pokusím popsat, co je třeba udělat k rozběhnutí Linuxu na LVM s GPT diskem a EFI." />
+<meta property="og:description" content="Experimentuji z Arch Linuxem. Hlavní důvod je, že se zdá, že Arch je cesta, jak pochopit, relativně do detailů, jak některé věci, které před námi “velké” distribuce jako Debian, Ubuntu, či třeba Fedora tají tím, že je tak nějak udělají za nás. V následujcím postu se pokusím popsat, co je třeba udělat k rozběhnutí Linuxu na LVM s GPT diskem a EFI." />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-11-23T00:00:00+01:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Příparava LVM pro instalaci Linuxu" />
+<script type="application/ld+json">
+{"url":"/2021/11/23/lvm.html","headline":"Příparava LVM pro instalaci Linuxu","dateModified":"2021-11-23T00:00:00+01:00","datePublished":"2021-11-23T00:00:00+01:00","mainEntityOfPage":{"@type":"WebPage","@id":"/2021/11/23/lvm.html"},"author":{"@type":"Person","name":"bobac"},"@type":"BlogPosting","description":"Experimentuji z Arch Linuxem. Hlavní důvod je, že se zdá, že Arch je cesta, jak pochopit, relativně do detailů, jak některé věci, které před námi “velké” distribuce jako Debian, Ubuntu, či třeba Fedora tají tím, že je tak nějak udělají za nás. V následujcím postu se pokusím popsat, co je třeba udělat k rozběhnutí Linuxu na LVM s GPT diskem a EFI.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <title>Příparava LVM pro instalaci Linuxu</title>
+</head>
+<body>
+    <nav>
+  
+    <a href="/" >
+        Bobáčův blbník
+    </a>
+  
+    <a href="/about.html" >
+        Něco o mě
+    </a>
+  
+</nav>
+    <h1>Příparava LVM pro instalaci Linuxu</h1>
+<p>23 Nov 2021 - bobac</p>
+
+<p>Experimentuji z Arch Linuxem. Hlavní důvod je, že se zdá, že Arch je cesta, jak pochopit, relativně do detailů, jak některé věci, které před námi “velké” distribuce jako Debian, Ubuntu, či třeba Fedora tají tím, že je tak nějak udělají za nás. V následujcím postu se pokusím popsat, co je třeba udělat k rozběhnutí <strong>Linuxu na LVM s GPT diskem a EFI</strong>.</p>
+
+<h2 id="partitions">Partitions</h2>
+
+<p>Vyrobil jsem si GPT disk se 3 partition:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/dev/sda1 - EFI System - 512MB
+/dev/sda2 - Linux Swap - 2*RAM
+/dev/sda3 - Linux LVM - 220GB
+</code></pre></div></div>
+
+<h2 id="swap">Swap</h2>
+
+<ol>
+  <li>vytvoření swapu: <code class="language-plaintext highlighter-rouge">mkswap /dev/sda2</code></li>
+  <li>zapnutí swapu: <code class="language-plaintext highlighter-rouge">swapon /dev/sda2</code></li>
+  <li>ověření, že swap swappuje - <code class="language-plaintext highlighter-rouge">free</code></li>
+</ol>
+
+<h2 id="formátování-efi-partition">Formátování EFI partition</h2>
+
+<p>EFI naformátujeme jako <em>FAT32</em> pomocí <code class="language-plaintext highlighter-rouge">mkfs.fat -F 32 /dev/sda1</code></p>
+
+<h2 id="lvm">LVM</h2>
+
+<h3 id="zjištění-jaké-lvm-capable-partition-máme-k-dispozici">Zjištění, jaké LVM capable partition máme k dispozici</h3>
+<p>Bylo by hezké, kdyby tam byly i ty naše nově vytvořené:-)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lvmdiskscan
+</code></pre></div></div>
+
+<h3 id="vytvoření-lvm-physical-volume">Vytvoření LVM Physical Volume</h3>
+<p><code class="language-plaintext highlighter-rouge">pvcreate DEVICE</code> kde <em>DEVICE</em> může být disk nebo partition. <strong>POZOR!</strong> je to destruktivní akce:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># pvcreate /dev/sda3
+  Physical volume "/dev/sda3" successfully created.
+</code></pre></div></div>
+
+<p>Ověření: <code class="language-plaintext highlighter-rouge">pvdisplay</code></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  "/dev/sda3" is a new physical volume of "220.00 GiB"
+  --- NEW Physical volume ---
+  PV Name               /dev/sda3
+  VG Name
+  PV Size               220.00 GiB
+  Allocatable           NO
+  PE Size               0
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+  PV UUID               Dhjl3L-fHD3-Yic2-R3s9-e1Op-mPka-FCGgwF
+</code></pre></div></div>
+
+<p>Sumář lze také získat pomocí <code class="language-plaintext highlighter-rouge">pvscan</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  PV /dev/sda3                      lvm2 [220.00 GiB]
+  Total: 1 [220.00 GiB] / in use: 0 [0   ] / in no VG: 1 [220.00 GiB]
+</code></pre></div></div>
+
+<h3 id="vytvoření-volume-group">Vytvoření volume group</h3>
+<p><code class="language-plaintext highlighter-rouge">vgcreate lvm_root /dev/partition</code></p>
+
+<p>V našem případě:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@archiso ~ # vgcreate vg_arch /dev/sda3
+  Volume group "vg_arch" successfully created
+</code></pre></div></div>
+
+<p>Ověření, že VG existují pomocí <code class="language-plaintext highlighter-rouge">vgdisplay</code>. Výstup vypadá takhle:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --- Volume group ---
+  VG Name               vg_arch
+  System ID
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  1
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               &lt;220.00 GiB
+  PE Size               4.00 MiB
+  Total PE              56319
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       56319 / &lt;220.00 GiB
+  VG UUID               Mu8Gq9-3v9O-TL3F-RKZC-Z31D-TzOY-GUG9LZ
+</code></pre></div></div>
+
+<h3 id="rozšiřování-volume-group">Rozšiřování volume group</h3>
+<p>Již existující volume group je možné rozšířit o další zařízení, např:
+<code class="language-plaintext highlighter-rouge">vgextend vg_arch /dev/sdb1</code></p>
+
+<h3 id="vytvoření-logical-volumes">Vytvoření logical volumes</h3>
+<p>Vytvoříme 30GB <code class="language-plaintext highlighter-rouge">lvm_root</code> (/) a 80% zbytku použijeme na <code class="language-plaintext highlighter-rouge">lvm_home</code> (/home):</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># lvcreate -L 30G vg_arch -n lvm_root
+  Logical volume "lvm_root" created.
+# lvcreate -l 80%FREE vg_arch -n lvm_home
+  Logical volume "lvm_home" created.
+</code></pre></div></div>
+<p>Ověříme pomocí <code class="language-plaintext highlighter-rouge">lvdisplay</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  --- Logical volume ---
+  LV Path                /dev/vg_arch/lvm_root
+  LV Name                lvm_root
+  VG Name                vg_arch
+  LV UUID                5qKjyS-4Rik-t61M-yXpV-yLke-yBoU-fkylRd
+  LV Write Access        read/write
+  LV Creation host, time archiso, 2021-11-23 13:01:37 +0000
+  LV Status              available
+  # open                 0
+  LV Size                30.00 GiB
+  Current LE             7680
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           254:1
+
+  --- Logical volume ---
+  LV Path                /dev/vg_arch/lvm_home
+  LV Name                lvm_home
+  VG Name                vg_arch
+  LV UUID                RKPFXX-59Eh-8PhI-PsAb-zuC0-HNXQ-xP4zhn
+  LV Write Access        read/write
+  LV Creation host, time archiso, 2021-11-23 13:04:09 +0000
+  LV Status              available
+  # open                 0
+  LV Size                &lt;152.00 GiB
+  Current LE             38911
+  Segments               1
+  Allocation             inherit
+  Read ahead sectors     auto
+  - currently set to     256
+  Block device           254:2
+</code></pre></div></div>
+
+<h3 id="naformátování-a-mountování-lv">Naformátování a mountování LV</h3>
+<p>Logical volumes jsou k dispozici v <code class="language-plaintext highlighter-rouge">/dev/vg_arch</code>:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># ls /dev/vg_arch
+lvm_home  lvm_root
+</code></pre></div></div>
+
+<p>Pokud nejsou vidět (u mě ano), mělo by pomoci nahrání kernel modulu a jejich zpřístupnění:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>modprobe dm_mod
+vgscan
+vgchange -ay
+</code></pre></div></div>
+
+<p><strong>Naformátování a mountování</strong></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkfs.&lt;fstype&gt; /dev/&lt;volume_group&gt;/&lt;logical_volume&gt;
+mount /dev/&lt;volue_group&gt;/&lt;logical_volume&gt; /&lt;mountpoint&gt;
+</code></pre></div></div>
+<p>Takže v našem případě:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mkfs.ext4 /dev/vg_arch/lvm_root
+mount /dev/vg_arch/lvm_root /mnt
+
+mkdir /mnt/home
+mkfs.ext4 /dev/vg_arch/lvm_home
+mount /dev/vg_arch/lvm_home /mnt/home
+</code></pre></div></div>
+
+<h2 id="příště">Příště</h2>
+<p>Co s EFI bootem a tak… Snad. Asi. možná.</p>
+
+</body>
+</html>
