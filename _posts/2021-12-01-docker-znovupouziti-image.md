@@ -24,5 +24,11 @@ services:
       depends_on: master
 ```
 
+## Použití
+Pak už stačí jen image zbuildit pomocí `docker-compose build`. Docker Compose buildne `master` image a pojmenuje ji `mojeimage`.Následný `docker-compose up` už pustí obě services z jediné image.
+
+### Poznámka
+Preferuji vytvoření `docker-compose.yml` a následné buildění (pokud to jde) pomocí **Docker Compose** zejména proto, že v podstatě předpis (který tak jako tak potřebuju) mám v `docker-compose.yml` a nemusím přemýšlet (to bolí vždy) nad tím, jak pojmenovat image apod. tak, aby to fungovalo. Samozřejmě, že by fungovalo ručně zbuildit pomocí `docker build -t mojeimage .`, ale tam bych musel jméno image nejdřív stejně vyčíst ze svého `docker-compose.yml`. Takhle je to jednodušší :-)
+
 ## Credits
 Celé jsem to ukradl na [Stack Overflow](https://stackoverflow.com/questions/50019948/reuse-image-built-by-one-service-in-another-service/50025029#:~:text=28-,Docker%20Compose,-builds%20your%20image).

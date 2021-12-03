@@ -59,6 +59,12 @@ services:
       depends_on: master
 </code></pre></div></div>
 
+<h2 id="použití">Použití</h2>
+<p>Pak už stačí jen image zbuildit pomocí <code class="language-plaintext highlighter-rouge">docker-compose build</code>. Docker Compose buildne <code class="language-plaintext highlighter-rouge">master</code> image a pojmenuje ji <code class="language-plaintext highlighter-rouge">mojeimage</code>.Následný <code class="language-plaintext highlighter-rouge">docker-compose up</code> už pustí obě services z jediné image.</p>
+
+<h3 id="poznámka">Poznámka</h3>
+<p>Preferuji vytvoření <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> a následné buildění (pokud to jde) pomocí <strong>Docker Compose</strong> zejména proto, že v podstatě předpis (který tak jako tak potřebuju) mám v <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> a nemusím přemýšlet (to bolí vždy) nad tím, jak pojmenovat image apod. tak, aby to fungovalo. Samozřejmě, že by fungovalo ručně zbuildit pomocí <code class="language-plaintext highlighter-rouge">docker build -t mojeimage .</code>, ale tam bych musel jméno image nejdřív stejně vyčíst ze svého <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>. Takhle je to jednodušší :-)</p>
+
 <h2 id="credits">Credits</h2>
 <p>Celé jsem to ukradl na <a href="https://stackoverflow.com/questions/50019948/reuse-image-built-by-one-service-in-another-service/50025029#:~:text=28-,Docker%20Compose,-builds%20your%20image">Stack Overflow</a>.</p>
 
