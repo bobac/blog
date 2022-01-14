@@ -1,0 +1,16 @@
+I"�<p>Pokud na M365 vyrobíte sdílený resource mailbox (třeba na rezervace zasedačky, nebo auta), je nepříjemné, že ve výchozím stavu není vidět, kdo má daný prostředek rezervovaný, pokud se do kalendáře podíváte z Outlooku - je tam jen, že je Busy.</p>
+
+<p>Zajistit, aby <strong>Exchange Online</strong> do vytvořené události laskavě připsala, kdo je za ní zodpovědný, je možné pomocí následujících příkazů v <em>PowerShellu</em>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Import-Module ExchangeOnlineManagement
+Connect-ExchangeOnline -UserPrincipalName admin@firma.onmicrosoft.com
+Set-MailboxFolderPermission -Identity sdilenymailbox:\Calendar -User default -AccessRights LimitedDetail
+Set-CalendarProcessing -Identity sdilenymailbox -AddOrganizerToSubject $true -DeleteComments $false -DeleteSubject $false
+</code></pre></div></div>
+
+<h3 id="poznámka">Poznámka</h3>
+<p>Je nepříjemné, že jsem nepřišel na to, jak udělat to samé, ale být přihlášen jako já, a vyrobit to pro jiného tenanta. Jinými slovy, musím být přihlášen jako admin organizace, pro kterou to nastavuju, ne jako admin organizace, která tuhle organizaci spravuje. Grrrr.!!!</p>
+
+<h2 id="credits">Credits</h2>
+<p>Jako tradičně jsem to vykradl někde jinde - jmenovitě <a href="https://lazyadmin.nl/office-365/show-details-room-mailbox-meetings-in-its-calendar-in-office-365/">tady</a>.</p>
+:ET
