@@ -1,0 +1,46 @@
+I"�<p>V praxi není nic neobvyklého, když po instalaci Azure AD Connect najdete v AD pár podivných účtů, které na první pohled nedávají smysl. Tato konverzace objasnila, co je co, a proč někdy může nastat problém při přidávání těchto účtů do skupin podle interních politik.</p>
+
+<h2 id="co-vlastně-azure-ad-connect-vytváří">Co vlastně Azure AD Connect vytváří</h2>
+<h3 id="1-adsyncmsaxxxx--definice-gmsa">1. <strong>ADSyncMSAxxxx</strong> – definice gMSA</h3>
+<p>Tohle je objekt typu <em>Group Managed Service Account</em>. Není to běžný uživatelský účet a nemůže se přihlásit. Je to jen „hlavička“ účtu, kterou Active Directory používá k řízení hesel a atributů.</p>
+
+<h3 id="2-adsyncmsaxxxx--skutečný-bezpečnostní-principal">2. <strong>ADSyncMSAxxxx$</strong> – skutečný bezpečnostní principal</h3>
+<p>Služba „Microsoft Azure AD Sync“ běží právě pod tímto účtem.<br />
+Je to reálný logon účet a má <code class="language-plaintext highlighter-rouge">$</code> stejně jako počítačové účty.<br />
+V konzoli MMC ho ale často vůbec neuvidíte, což mate správce.</p>
+
+<h3 id="3-msol_xxxxxxx--starý-service-account">3. <strong>MSOL_xxxxxxx</strong> – starý service account</h3>
+<p>Tohle je účet ze starší verze AAD Connect. Moderní instalace už tento účet nepoužívají, ale účet v AD zůstává jako pozůstatek. Nemá vztah k současnému gMSA účtu.</p>
+
+<h2 id="proč-nejde-účet-najít-v-ad">Proč nejde účet najít v AD</h2>
+<p>MMC (dsa.msc) neumí zobrazit gMSA tak, jak by člověk čekal.<br />
+Vidíte prázdný kontejner, nevidíte <code class="language-plaintext highlighter-rouge">$</code> účet, ale Azure AD Sync služba pod ním běží.</p>
+
+<p>Řešením je:</p>
+<ul>
+  <li>použít PowerShell,</li>
+  <li>nebo použít ADAC (který gMSA zobrazuje správně).</li>
+</ul>
+
+<h2 id="jak-přidat-adsync-gmsa-do-skupiny">Jak přidat ADSync gMSA do skupiny</h2>
+<p>Interní politika vyžaduje, aby všechny účty služeb byly členem určité skupiny — například <em>grpservice</em>.<br />
+Proto je potřeba přidat <strong>ADSyncMSAxxxx$</strong>.</p>
+
+<p>PowerShell řeší situaci okamžitě:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Add-ADGroupMember</span><span class="w"> </span><span class="nt">-Identity</span><span class="w"> </span><span class="s2">"grpservice"</span><span class="w"> </span><span class="nt">-Members</span><span class="w"> </span><span class="s2">"ADSyncMSAxxxx$"</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Pokud by vyhledání selhalo, použije se DN definice gMSA, AD si to sám namapuje.</p>
+
+<h2 id="závěr">Závěr</h2>
+<ul>
+  <li>Azure AD Connect používá gMSA, ne starý MSOL účet.</li>
+  <li><code class="language-plaintext highlighter-rouge">$</code> varianta je ta, kterou používá služba.</li>
+  <li>Pro přidání do skupiny je nutné pracovat právě s ní.</li>
+  <li>Starý účet MSOL můžeš s klidem smazat, pokud už není v provozu.</li>
+</ul>
+
+<p>Celá situace vzniká jen díky tomu, že MMC nepodává úplný obraz.<br />
+Jakmile člověk ví, co který objekt je, dává to celé perfektní smysl.</p>
+:ET

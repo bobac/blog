@@ -1,4 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2022-01-14T11:06:31+01:00</updated><id>/feed.xml</id><entry><title type="html">M365 - Jak na detaily u sdíleného resource mailboxu</title><link href="/2022/01/14/M365-jak-na-detaily-u-sdileneho-mailboxu.html" rel="alternate" type="text/html" title="M365 - Jak na detaily u sdíleného resource mailboxu" /><published>2022-01-14T00:00:00+01:00</published><updated>2022-01-14T00:00:00+01:00</updated><id>/2022/01/14/M365-jak-na-detaily-u-sdileneho-mailboxu</id><content type="html" xml:base="/2022/01/14/M365-jak-na-detaily-u-sdileneho-mailboxu.html">&lt;p&gt;Pokud na M365 vyrobíte sdílený resource mailbox (třeba na rezervace zasedačky, nebo auta), je nepříjemné, že ve výchozím stavu není vidět, kdo má daný prostředek rezervovaný, pokud se do kalendáře podíváte z Outlooku - je tam jen, že je Busy.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2025-11-26T13:13:25+01:00</updated><id>/feed.xml</id><entry><title type="html">Jak Azure AD Connect pracuje s účty ADSyncMSA a MSOL – stručné a praktické vysvětlení</title><link href="/2025/11/26/jak-azure-ad-connect-pracuje-s-ucty-v-AD.html" rel="alternate" type="text/html" title="Jak Azure AD Connect pracuje s účty ADSyncMSA a MSOL – stručné a praktické vysvětlení" /><published>2025-11-26T00:00:00+01:00</published><updated>2025-11-26T00:00:00+01:00</updated><id>/2025/11/26/jak-azure-ad-connect-pracuje-s-ucty-v-AD</id><content type="html" xml:base="/2025/11/26/jak-azure-ad-connect-pracuje-s-ucty-v-AD.html">&lt;p&gt;V praxi není nic neobvyklého, když po instalaci Azure AD Connect najdete v AD pár podivných účtů, které na první pohled nedávají smysl. Tato konverzace objasnila, co je co, a proč někdy může nastat problém při přidávání těchto účtů do skupin podle interních politik.&lt;/p&gt;
+
+&lt;h2 id=&quot;co-vlastně-azure-ad-connect-vytváří&quot;&gt;Co vlastně Azure AD Connect vytváří&lt;/h2&gt;
+&lt;h3 id=&quot;1-adsyncmsaxxxx--definice-gmsa&quot;&gt;1. &lt;strong&gt;ADSyncMSAxxxx&lt;/strong&gt; – definice gMSA&lt;/h3&gt;
+&lt;p&gt;Tohle je objekt typu &lt;em&gt;Group Managed Service Account&lt;/em&gt;. Není to běžný uživatelský účet a nemůže se přihlásit. Je to jen „hlavička“ účtu, kterou Active Directory používá k řízení hesel a atributů.&lt;/p&gt;
+
+&lt;h3 id=&quot;2-adsyncmsaxxxx--skutečný-bezpečnostní-principal&quot;&gt;2. &lt;strong&gt;ADSyncMSAxxxx$&lt;/strong&gt; – skutečný bezpečnostní principal&lt;/h3&gt;
+&lt;p&gt;Služba „Microsoft Azure AD Sync“ běží právě pod tímto účtem.&lt;br /&gt;
+Je to reálný logon účet a má &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$&lt;/code&gt; stejně jako počítačové účty.&lt;br /&gt;
+V konzoli MMC ho ale často vůbec neuvidíte, což mate správce.&lt;/p&gt;
+
+&lt;h3 id=&quot;3-msol_xxxxxxx--starý-service-account&quot;&gt;3. &lt;strong&gt;MSOL_xxxxxxx&lt;/strong&gt; – starý service account&lt;/h3&gt;
+&lt;p&gt;Tohle je účet ze starší verze AAD Connect. Moderní instalace už tento účet nepoužívají, ale účet v AD zůstává jako pozůstatek. Nemá vztah k současnému gMSA účtu.&lt;/p&gt;
+
+&lt;h2 id=&quot;proč-nejde-účet-najít-v-ad&quot;&gt;Proč nejde účet najít v AD&lt;/h2&gt;
+&lt;p&gt;MMC (dsa.msc) neumí zobrazit gMSA tak, jak by člověk čekal.&lt;br /&gt;
+Vidíte prázdný kontejner, nevidíte &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$&lt;/code&gt; účet, ale Azure AD Sync služba pod ním běží.&lt;/p&gt;
+
+&lt;p&gt;Řešením je:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;použít PowerShell,&lt;/li&gt;
+  &lt;li&gt;nebo použít ADAC (který gMSA zobrazuje správně).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;jak-přidat-adsync-gmsa-do-skupiny&quot;&gt;Jak přidat ADSync gMSA do skupiny&lt;/h2&gt;
+&lt;p&gt;Interní politika vyžaduje, aby všechny účty služeb byly členem určité skupiny — například &lt;em&gt;grpservice&lt;/em&gt;.&lt;br /&gt;
+Proto je potřeba přidat &lt;strong&gt;ADSyncMSAxxxx$&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;PowerShell řeší situaci okamžitě:&lt;/p&gt;
+
+&lt;div class=&quot;language-powershell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;Add-ADGroupMember&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Identity&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;grpservice&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;-Members&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ADSyncMSAxxxx$&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Pokud by vyhledání selhalo, použije se DN definice gMSA, AD si to sám namapuje.&lt;/p&gt;
+
+&lt;h2 id=&quot;závěr&quot;&gt;Závěr&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Azure AD Connect používá gMSA, ne starý MSOL účet.&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$&lt;/code&gt; varianta je ta, kterou používá služba.&lt;/li&gt;
+  &lt;li&gt;Pro přidání do skupiny je nutné pracovat právě s ní.&lt;/li&gt;
+  &lt;li&gt;Starý účet MSOL můžeš s klidem smazat, pokud už není v provozu.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Celá situace vzniká jen díky tomu, že MMC nepodává úplný obraz.&lt;br /&gt;
+Jakmile člověk ví, co který objekt je, dává to celé perfektní smysl.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">V praxi není nic neobvyklého, když po instalaci Azure AD Connect najdete v AD pár podivných účtů, které na první pohled nedávají smysl. Tato konverzace objasnila, co je co, a proč někdy může nastat problém při přidávání těchto účtů do skupin podle interních politik.</summary></entry><entry><title type="html">M365 - Jak na detaily u sdíleného resource mailboxu</title><link href="/2022/01/14/M365-jak-na-detaily-u-sdileneho-mailboxu.html" rel="alternate" type="text/html" title="M365 - Jak na detaily u sdíleného resource mailboxu" /><published>2022-01-14T00:00:00+01:00</published><updated>2022-01-14T00:00:00+01:00</updated><id>/2022/01/14/M365-jak-na-detaily-u-sdileneho-mailboxu</id><content type="html" xml:base="/2022/01/14/M365-jak-na-detaily-u-sdileneho-mailboxu.html">&lt;p&gt;Pokud na M365 vyrobíte sdílený resource mailbox (třeba na rezervace zasedačky, nebo auta), je nepříjemné, že ve výchozím stavu není vidět, kdo má daný prostředek rezervovaný, pokud se do kalendáře podíváte z Outlooku - je tam jen, že je Busy.&lt;/p&gt;
 
 &lt;p&gt;Zajistit, aby &lt;strong&gt;Exchange Online&lt;/strong&gt; do vytvořené události laskavě připsala, kdo je za ní zodpovědný, je možné pomocí následujících příkazů v &lt;em&gt;PowerShellu&lt;/em&gt;:&lt;/p&gt;
 
@@ -226,22 +270,7 @@ mount /dev/vg_arch/lvm_home /mnt/home
 
 &lt;h2 id=&quot;credits&quot;&gt;Credits&lt;/h2&gt;
 
-&lt;p&gt;Čerpal jsem ve fóru na &lt;a href=&quot;https://superuser.com/questions/1280141/switch-raid-to-ahci-without-reinstalling-windows-10#:~:text=56-,There,-is%20actually%20another&quot;&gt;Superuser&lt;/a&gt;. Nepoužil jsem preferred řešení, ale to níže uvedené (link ukazuje přímo do textu, pokud používáte poslední Chrome, já mám &lt;em&gt;96.0.4664.55&lt;/em&gt;).&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Potřeboval jsem u svého stárnoucího Dell OptiPLex 3050 změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou Windows 10, a na druhém (SATA) mám Ubuntu 20.04. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné /dev/nvme* nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.</summary></entry><entry><title type="html">Jak nastavit Windows, aby braly hodiny v počítači dle UTC</title><link href="/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC.html" rel="alternate" type="text/html" title="Jak nastavit Windows, aby braly hodiny v počítači dle UTC" /><published>2021-11-19T00:00:00+01:00</published><updated>2021-11-19T00:00:00+01:00</updated><id>/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC</id><content type="html" xml:base="/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC.html">&lt;p&gt;Občas je třeba, aby RTC hodiny v počítači byly nastaveny na &lt;em&gt;UTC&lt;/em&gt;, ale aby Windows ukazovaly čas dle naší časové zóny, tedy &lt;em&gt;local time&lt;/em&gt;. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.&lt;/p&gt;
-
-&lt;p&gt;To způsobuje následující problémy:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;liší se časy souborů vytvořených jednotlivými systémy o rozdíl mezi UTC a místním časem (u nás o 1 až 2 hodiny, podle toho, jestli máme zrovna letní nebo zimní čas)&lt;/li&gt;
-  &lt;li&gt;systémy se neustále přetahují o to, na kolik budou hodiny nastaveny, protože synchronizace času z internetu nastavuje taky RTC hodiny v počítači&lt;/li&gt;
-  &lt;li&gt;následkem čeho není čas nikdy dobře :-)&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h2 id=&quot;co-s-tím&quot;&gt;Co s tím&lt;/h2&gt;
-&lt;p&gt;Stačí Windows říct, že mají taky počíat s tím, že čas v RTC hodinách v počítači (ten, co si nastavujete v setupu) je UTC. Stačí na to jednoduchá úprava v registrech:&lt;/p&gt;
-
-&lt;p&gt;V klíči &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation&lt;/code&gt; vytvořte &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;QWORD&lt;/code&gt; se jménam &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RealTimeIsUniversal&lt;/code&gt; a nastavte jeho hodnotu na &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1&lt;/code&gt; a rebootněte systém. To je vše.&lt;/p&gt;
-
-&lt;p&gt;Pokud náhodou používáte 32bitová Windows (existuje ještě někdo takový?), místo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;QWORD&lt;/code&gt; použijte &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DWORD&lt;/code&gt;.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Občas je třeba, aby RTC hodiny v počítači byly nastaveny na UTC, ale aby Windows ukazovaly čas dle naší časové zóny, tedy local time. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.</summary></entry><entry><title type="html">Clonezilla - divná chyba MBR a GPT mismatch</title><link href="/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html" rel="alternate" type="text/html" title="Clonezilla - divná chyba MBR a GPT mismatch" /><published>2021-11-19T00:00:00+01:00</published><updated>2021-11-19T00:00:00+01:00</updated><id>/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error</id><content type="html" xml:base="/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html">&lt;p&gt;Experimentoval jsem s &lt;a href=&quot;https://clonezilla.org/&quot;&gt;Clonezillou&lt;/a&gt;. Nainstaloval jsem čisté &lt;strong&gt;Windows 10 Pro&lt;/strong&gt; na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako &lt;em&gt;“this disk contains mismatched gpt and mbr”&lt;/em&gt; a imagování crashlo ještě dřív, než začalo.&lt;/p&gt;
+&lt;p&gt;Čerpal jsem ve fóru na &lt;a href=&quot;https://superuser.com/questions/1280141/switch-raid-to-ahci-without-reinstalling-windows-10#:~:text=56-,There,-is%20actually%20another&quot;&gt;Superuser&lt;/a&gt;. Nepoužil jsem preferred řešení, ale to níže uvedené (link ukazuje přímo do textu, pokud používáte poslední Chrome, já mám &lt;em&gt;96.0.4664.55&lt;/em&gt;).&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Potřeboval jsem u svého stárnoucího Dell OptiPLex 3050 změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou Windows 10, a na druhém (SATA) mám Ubuntu 20.04. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné /dev/nvme* nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.</summary></entry><entry><title type="html">Clonezilla - divná chyba MBR a GPT mismatch</title><link href="/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html" rel="alternate" type="text/html" title="Clonezilla - divná chyba MBR a GPT mismatch" /><published>2021-11-19T00:00:00+01:00</published><updated>2021-11-19T00:00:00+01:00</updated><id>/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error</id><content type="html" xml:base="/2021/11/19/Clonezilla-MBR-GPT-Mismatch-error.html">&lt;p&gt;Experimentoval jsem s &lt;a href=&quot;https://clonezilla.org/&quot;&gt;Clonezillou&lt;/a&gt;. Nainstaloval jsem čisté &lt;strong&gt;Windows 10 Pro&lt;/strong&gt; na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako &lt;em&gt;“this disk contains mismatched gpt and mbr”&lt;/em&gt; a imagování crashlo ještě dřív, než začalo.&lt;/p&gt;
 
 &lt;p&gt;No, a protože jsem začal gůglit a na první dobrou jsem si pěkně MBR partition zlikvidoval tak, že wokna ani nezačala bootovat, podruhé jsem gůglil pozorněji a tady je postup, co v takovém případě udělat - tohle fungovalo. Pro mě dobrá zpráva je, že jsem na disku neměl žádná data, takže kromě ztráty času se nekonal žádný stress :-)&lt;/p&gt;
 
@@ -288,7 +317,22 @@ with fdisk or another tool.
 &lt;/ul&gt;
 
 &lt;h2 id=&quot;credits&quot;&gt;Credits&lt;/h2&gt;
-&lt;p&gt;Našel jsem to původně &lt;a href=&quot;https://casits.artsandsciences.fsu.edu/tips/cloning-systems/mismatched-GPT-MBR-error&quot;&gt;tady&lt;/a&gt;.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Experimentoval jsem s Clonezillou. Nainstaloval jsem čisté Windows 10 Pro na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako “this disk contains mismatched gpt and mbr” a imagování crashlo ještě dřív, než začalo.</summary></entry><entry><title type="html">Navidrome - self hosted music streaming</title><link href="/2021/11/17/Navidrome-self-hosted-music-streaming.html" rel="alternate" type="text/html" title="Navidrome - self hosted music streaming" /><published>2021-11-17T00:00:00+01:00</published><updated>2021-11-17T00:00:00+01:00</updated><id>/2021/11/17/Navidrome-self-hosted-music-streaming</id><content type="html" xml:base="/2021/11/17/Navidrome-self-hosted-music-streaming.html">&lt;p&gt;V minulém &lt;a href=&quot;/2021/11/17/Tagy-na-mp3-z-cli.html&quot;&gt;blogu&lt;/a&gt; jsem psal o &lt;strong&gt;mid3v2&lt;/strong&gt; k editování MP3 Tagů z CLI. Potřeboval jsem si rozběhnout vlastní streamování MP3, které bude mimo iTunes. Jde o to, že mám pár audioknih, které jsem koupil u &lt;a href=&quot;https://kechlibar.net/obchod/&quot;&gt;Mariana Kechlibara&lt;/a&gt;, a které jsem potřeboval oddělit od iTunes. Důvod je poměrně jednoduchý - chci, abych měl rozposlouchanou knihu někde jinde než muziku, z toho prostého důvodu, že iTunes nemá žádné záložky, takže jakmile pustím nějakou hudbu, prd vím, kde jsem přestal poslouchat knížku :-)&lt;/p&gt;
+&lt;p&gt;Našel jsem to původně &lt;a href=&quot;https://casits.artsandsciences.fsu.edu/tips/cloning-systems/mismatched-GPT-MBR-error&quot;&gt;tady&lt;/a&gt;.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Experimentoval jsem s Clonezillou. Nainstaloval jsem čisté Windows 10 Pro na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako “this disk contains mismatched gpt and mbr” a imagování crashlo ještě dřív, než začalo.</summary></entry><entry><title type="html">Jak nastavit Windows, aby braly hodiny v počítači dle UTC</title><link href="/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC.html" rel="alternate" type="text/html" title="Jak nastavit Windows, aby braly hodiny v počítači dle UTC" /><published>2021-11-19T00:00:00+01:00</published><updated>2021-11-19T00:00:00+01:00</updated><id>/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC</id><content type="html" xml:base="/2021/11/19/Jak-nastavit-Windows-hodiny-na-UTC.html">&lt;p&gt;Občas je třeba, aby RTC hodiny v počítači byly nastaveny na &lt;em&gt;UTC&lt;/em&gt;, ale aby Windows ukazovaly čas dle naší časové zóny, tedy &lt;em&gt;local time&lt;/em&gt;. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.&lt;/p&gt;
+
+&lt;p&gt;To způsobuje následující problémy:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;liší se časy souborů vytvořených jednotlivými systémy o rozdíl mezi UTC a místním časem (u nás o 1 až 2 hodiny, podle toho, jestli máme zrovna letní nebo zimní čas)&lt;/li&gt;
+  &lt;li&gt;systémy se neustále přetahují o to, na kolik budou hodiny nastaveny, protože synchronizace času z internetu nastavuje taky RTC hodiny v počítači&lt;/li&gt;
+  &lt;li&gt;následkem čeho není čas nikdy dobře :-)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;co-s-tím&quot;&gt;Co s tím&lt;/h2&gt;
+&lt;p&gt;Stačí Windows říct, že mají taky počíat s tím, že čas v RTC hodinách v počítači (ten, co si nastavujete v setupu) je UTC. Stačí na to jednoduchá úprava v registrech:&lt;/p&gt;
+
+&lt;p&gt;V klíči &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\TimeZoneInformation&lt;/code&gt; vytvořte &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;QWORD&lt;/code&gt; se jménam &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RealTimeIsUniversal&lt;/code&gt; a nastavte jeho hodnotu na &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1&lt;/code&gt; a rebootněte systém. To je vše.&lt;/p&gt;
+
+&lt;p&gt;Pokud náhodou používáte 32bitová Windows (existuje ještě někdo takový?), místo &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;QWORD&lt;/code&gt; použijte &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DWORD&lt;/code&gt;.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Občas je třeba, aby RTC hodiny v počítači byly nastaveny na UTC, ale aby Windows ukazovaly čas dle naší časové zóny, tedy local time. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.</summary></entry><entry><title type="html">Navidrome - self hosted music streaming</title><link href="/2021/11/17/Navidrome-self-hosted-music-streaming.html" rel="alternate" type="text/html" title="Navidrome - self hosted music streaming" /><published>2021-11-17T00:00:00+01:00</published><updated>2021-11-17T00:00:00+01:00</updated><id>/2021/11/17/Navidrome-self-hosted-music-streaming</id><content type="html" xml:base="/2021/11/17/Navidrome-self-hosted-music-streaming.html">&lt;p&gt;V minulém &lt;a href=&quot;/2021/11/17/Tagy-na-mp3-z-cli.html&quot;&gt;blogu&lt;/a&gt; jsem psal o &lt;strong&gt;mid3v2&lt;/strong&gt; k editování MP3 Tagů z CLI. Potřeboval jsem si rozběhnout vlastní streamování MP3, které bude mimo iTunes. Jde o to, že mám pár audioknih, které jsem koupil u &lt;a href=&quot;https://kechlibar.net/obchod/&quot;&gt;Mariana Kechlibara&lt;/a&gt;, a které jsem potřeboval oddělit od iTunes. Důvod je poměrně jednoduchý - chci, abych měl rozposlouchanou knihu někde jinde než muziku, z toho prostého důvodu, že iTunes nemá žádné záložky, takže jakmile pustím nějakou hudbu, prd vím, kde jsem přestal poslouchat knížku :-)&lt;/p&gt;
 
 &lt;h2 id=&quot;požadavky&quot;&gt;Požadavky&lt;/h2&gt;
 &lt;p&gt;Celkem jednoduché:&lt;/p&gt;
@@ -494,69 +538,4 @@ services:
 A je to.&lt;/p&gt;
 
 &lt;h2 id=&quot;závěr&quot;&gt;Závěr&lt;/h2&gt;
-&lt;p&gt;Nevím, jestli se zbavím svého &lt;strong&gt;NGINX&lt;/strong&gt;. Ale jenom kvůli tomu, že na něj existuje to krásný klikátko. &lt;strong&gt;Caddy&lt;/strong&gt; je totiž tak easy, že snad klikátko ani nepotřebuje. Ale pokud budu zase někdy potřebovat reverzní proxy s NTLM (v mém případě to bylo kvůli Windows Admin Center), určitě po Caddym sáhnu. A dost možná, že na něj přejdu úplně a klikátko oželím. Je to zatím nejjednodušší web server, jaký jsem kdy viděl.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru Caddy, ale zatím jsem si vždy vystačil s kombem NGINX a geniálním, krásným, a vůbec po všech stránkách velmi povedeným Nginx Proxy Managerem. Důvod, proč jsem vždycky používal NGINX (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil Let’s Encrypt certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale Nginx Proxy Manager to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej HTTP traffic automaticky forwardovat na HTTPS a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro NGINX samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:</summary></entry><entry><title type="html">Jekyll</title><link href="/2021/10/31/jekyll.html" rel="alternate" type="text/html" title="Jekyll" /><published>2021-10-31T00:00:00+02:00</published><updated>2021-10-31T00:00:00+02:00</updated><id>/2021/10/31/jekyll</id><content type="html" xml:base="/2021/10/31/jekyll.html">&lt;p&gt;Tenhle blbník běží na &lt;a href=&quot;https://jekyllrb.com&quot;&gt;Jekyllu&lt;/a&gt;. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?&lt;/p&gt;
-
-&lt;p&gt;Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Jekyll&lt;/strong&gt; umí samozřejmě vkládat obrázky:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;/assets/images/tux.png&quot; alt=&quot;Tux, maskot Linuxu&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;…protože to umí &lt;a href=&quot;https://www.markdownguide.org/basic-syntax/&quot;&gt;Markdown&lt;/a&gt;. Idea Markdownu je, aby text, který v něm napíšete, šlo lidsky číst, i když do něj koukáte, jako do prostýho texťáku. Kdo se někdy snažil přečíst delší text v html bez prohlížeče, který by jej vyrenderoval ví, o čem mluvím.&lt;/p&gt;
-
-&lt;p&gt;Markdown (MD) samozřejmě umí &lt;em&gt;Kurzívu&lt;/em&gt; nebo &lt;strong&gt;Tučný text&lt;/strong&gt;. Taky umí číslované i nečíslované seznamy:&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;první položka
-    &lt;ul&gt;
-      &lt;li&gt;subpoložka a&lt;/li&gt;
-      &lt;li&gt;subpoložka b&lt;/li&gt;
-      &lt;li&gt;subpoložka c&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;druhá položka&lt;/li&gt;
-  &lt;li&gt;třetí položka&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;strong&gt;Jekyll&lt;/strong&gt; nedělá nic jiného, než drží kostru webu pohromadě, tedy z hromádky textových (pardon, MD) souborů ve struktuře asi jako:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;_posts
-    2021-10-29-prvni-post.md
-    2021-10-31-jekyll.md
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;vyrobí tenhle web v html.&lt;/p&gt;
-
-&lt;p&gt;Původní text (zdroják, chcete-li) tohoto postu vypadá takhle:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;---
-layout: post
-author: bobac
----
-Tenhle blbník běží na [Jekyllu](https://jekyllrb.com). Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?
-
-Přeci jen něco málo o tom, co Jekyll je - je to statický generátor webů. Což znamená, že na samotný hosting webu nepotřebujete nic. Žádný php, žádnou databázi, žádnej redakční systém. Celý obsah je jen něco málo html jako layout a pak už jen hromádka *.md souborů.
-
-**Jekyll** umí samozřejmě vkládat obrázky:
-
-![Tux, maskot Linuxu](/assets/images/tux.png)
-
-...protože to umí [Markdown](https://www.markdownguide.org/basic-syntax/). Idea Markdownu je, aby text, který v něm napíšete, šlo lidsky číst, i když do něj koukáte, jako do prostýho texťáku. Kdo se někdy snažil přečíst delší text v html bez prohlížeče, který by jej vyrenderoval ví, o čem mluvím.
-
-Markdown (MD) samozřejmě umí _Kurzívu_ nebo **Tučný text**. Taky umí číslované i nečíslované seznamy:
-
-1. první položka
-    - subpoložka a
-    - subpoložka b
-    - subpoložka c
-2. druhá položka
-3. třetí položka
-
-**Jekyll** nedělá nic jiného, než drží kostru webu pohromadě, tedy z hromádky textových (pardon, MD) souborů ve struktuře asi jako:
-
-    _posts
-        2021-10-29-prvni-post.md
-        2021-10-31-jekyll.md
-
-vyrobí tenhle web v html.
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>bobac</name></author><summary type="html">Tenhle blbník běží na Jekyllu. Pohrávám si s myšlenkou, že to vůbec nebudu stylovat nechám to takhle hnusný. Čistej defaultní html layout jako z devadesátek, tesně před tím, než lidé přišli na to, že je možný přidělat nějkaý blikátka. Pamatujete si taky na ty hnusný animovaný GIFy?</summary></entry></feed>
+&lt;p&gt;Nevím, jestli se zbavím svého &lt;strong&gt;NGINX&lt;/strong&gt;. Ale jenom kvůli tomu, že na něj existuje to krásný klikátko. &lt;strong&gt;Caddy&lt;/strong&gt; je totiž tak easy, že snad klikátko ani nepotřebuje. Ale pokud budu zase někdy potřebovat reverzní proxy s NTLM (v mém případě to bylo kvůli Windows Admin Center), určitě po Caddym sáhnu. A dost možná, že na něj přejdu úplně a klikátko oželím. Je to zatím nejjednodušší web server, jaký jsem kdy viděl.&lt;/p&gt;</content><author><name>bobac</name></author><summary type="html">Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru Caddy, ale zatím jsem si vždy vystačil s kombem NGINX a geniálním, krásným, a vůbec po všech stránkách velmi povedeným Nginx Proxy Managerem. Důvod, proč jsem vždycky používal NGINX (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil Let’s Encrypt certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale Nginx Proxy Manager to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej HTTP traffic automaticky forwardovat na HTTPS a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro NGINX samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:</summary></entry></feed>
