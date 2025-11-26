@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: M365 - Jak na detaily u sdíleného resource mailboxu
+tags: [m365]
 ---
 Pokud na M365 vyrobíte sdílený resource mailbox (třeba na rezervace zasedačky, nebo auta), je nepříjemné, že ve výchozím stavu není vidět, kdo má daný prostředek rezervovaný, pokud se do kalendáře podíváte z Outlooku - je tam jen, že je Busy.
 

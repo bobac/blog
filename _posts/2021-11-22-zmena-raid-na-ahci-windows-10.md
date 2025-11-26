@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Změna SATA RAID mode na AHCI a nebootující Windows 10
+tags: [windows]
 ---
 Potřeboval jsem u svého stárnoucího **Dell OptiPLex 3050** změnit v BIOSu režim SATA disku z RAID na AHCI. Potřeboval jsem to proto, že primární disk je NVME, na něm jsou **Windows 10**, a na druhém (SATA) mám **Ubuntu 20.04**. Potřebuji z Linuxu vidět na Windowsí disk a gůglením jsem zjistil, že důvod, proč žádné `/dev/nvme*` nevidím není v tom, že by můj kernel 5.4.xx NVME nepodporoval, NVME je podporováno už od kernelu 3.3, ale v tom, že kernel nevidí NVME disk, když je v BIOSu nastavený SATA RAID mode.
 

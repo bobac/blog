@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Jak nastavit Windows, aby braly hodiny v počítači dle UTC
+tags: [windows]
 ---
 Občas je třeba, aby RTC hodiny v počítači byly nastaveny na *UTC*, ale aby Windows ukazovaly čas dle naší časové zóny, tedy *local time*. Hodí se to třeba v případě, že provozujete dual boot Windows a Linux. Obecně je totiž zvykem, že Windows očekávají, že jsou hodiny v počítači nastaveny na místní čas, kdežto Linux očekává, že hodiny v počítači jsou nastaveny na UTC.
 

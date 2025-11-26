@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Jak Azure AD Connect pracuje s účty ADSyncMSA a MSOL – stručné a praktické vysvětlení
+tags: [azure,ad,chatgpt]
 ---
 V praxi není nic neobvyklého, když po instalaci Azure AD Connect najdete v AD pár podivných účtů, které na první pohled nedávají smysl. Tato konverzace objasnila, co je co, a proč někdy může nastat problém při přidávání těchto účtů do skupin podle interních politik.
 

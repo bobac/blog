@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Navidrome - self hosted music streaming
+tags: [linux,docker,mp3,audioknihy]
 ---
 V minulém [blogu](/2021/11/17/Tagy-na-mp3-z-cli.html) jsem psal o **mid3v2** k editování MP3 Tagů z CLI. Potřeboval jsem si rozběhnout vlastní streamování MP3, které bude mimo iTunes. Jde o to, že mám pár audioknih, které jsem koupil u [Mariana Kechlibara](https://kechlibar.net/obchod/), a které jsem potřeboval oddělit od iTunes. Důvod je poměrně jednoduchý - chci, abych měl rozposlouchanou knihu někde jinde než muziku, z toho prostého důvodu, že iTunes nemá žádné záložky, takže jakmile pustím nějakou hudbu, prd vím, kde jsem přestal poslouchat knížku :-)
 

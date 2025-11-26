@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Clonezilla - divná chyba MBR a GPT mismatch
+tags: [windows]
 ---
 Experimentoval jsem s [Clonezillou](https://clonezilla.org/). Nainstaloval jsem čisté **Windows 10 Pro** na disk, kde už předtím nějaká Win10 byla. Nicméně jsem v setupu na začátku vykilloval všechny partition a do prázdného místa nainstaloval Windows znovu. Po tradičním zapatchování jsem chtěl Clonezillou udělat image celého disku. Po odbouchání next - next - next víceméně s defaultním nastavením na mě vypadla divná chyba, něco jako *"this disk contains mismatched gpt and mbr"* a imagování crashlo ještě dřív, než začalo.
 

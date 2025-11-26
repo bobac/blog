@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Docker Compose - znovupoužití image, kterou buildovala jiná service
+tags: [docker]
 ---
 Potřeboval jsem `docker-compose.yml`, který buildil image z `Dockerfile` místo toho, aby ji hotovou odněkud stahoval, nebo abych ji nemusel buildovat předtím já ručně pomocí `docker build...`. To je docela šikovná věc, zejména, pokud ta image je to, co zrovna vyvíjíte. **Docker Compose** na to má hezkou direktivu `build` místo tradiční `image`.
 

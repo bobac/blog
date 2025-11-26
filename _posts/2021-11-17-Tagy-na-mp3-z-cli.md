@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Tagy na MP3 z CLI
+tags: [linux,mp3]
 ---
 Před chvílí jsem zjitil, že potřebuji z command lajny na linuxovém serveru upravovat tagy pro MP3 soubory. Po chvíli googlení jsem přistál u `mid3v2`. Hlavní důvod je, že by měl podporovat **utf-8**.
 

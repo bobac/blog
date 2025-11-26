@@ -2,6 +2,7 @@
 layout: post
 author: bobac
 title: Reverzní proxy s NTLM
+tags: [proxy,linux,ntlm]
 ---
 Už před časem jsem narazil na to, že pokud potřebuju někde udělat reverzní proxy, která potřebuje podporu NTLM authentication, tak mám se svým NGINXem smůlu. NGINX totiž podporuje NTLM pouze v placené verzi. Nějakou dobu registruji existenci web serveru **[Caddy](https://caddyserver.com/)**, ale zatím jsem si vždy vystačil s kombem [NGINX](https://www.nginx.com/) a geniálním, krásným, a vůbec po všech stránkách velmi povedeným [Nginx Proxy Managerem](https://nginxproxymanager.com/). Důvod, proč jsem vždycky používal **NGINX** (třeba namísto Apache) byl v tom, že mi styl konfigurace tak nějak šel lépe do ruky. Nějakou dobu jsem řešil **Let's Encrypt** certifikáty pomocí jejich skriptů a fungovalo to docela hezky, ale **Nginx Proxy Manager** to ještě dost zjednodušil - prostě si zaškrtnete, že k danému webu chcete https, necháte jej *HTTP* traffic automaticky forwardovat na *HTTPS* a o víc se nemusíte starat. Běží to ve dvou kontejnerech, má to hezké klikací webové rozhraní a generujete konfiguráky pro **NGINX** samo. A taky to samo obnovuje certifikáty. Nádhera! Vypadá to asi takhle:
 
